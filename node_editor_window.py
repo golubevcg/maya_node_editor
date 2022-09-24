@@ -1,6 +1,10 @@
 from PySide2.QtWidgets import *
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
+import node_graphics_scene
+import imp
+imp.reload(node_graphics_scene)
+
 from node_graphics_scene import QDMGraphicsScene
 
 
@@ -26,6 +30,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         # create graphic view
 
         self.show()
+        print("Tralala2")
 
 
 '''
