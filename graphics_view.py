@@ -122,5 +122,5 @@ class QDMGraphicsView(QGraphicsView):
             self.zoom, clamped = self.zoom_range[1], True
 
         # set scene scale
-        if not clamped or self.zoom_clap is False:
+        if not clamped or self.zoom_clamp is False:
             self.scale(zoom_factor, zoom_factor)

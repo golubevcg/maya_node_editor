@@ -3,17 +3,9 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
-import node_graphics_scene
-import imp
-imp.reload(node_graphics_scene)
-
-import node_graphics_view
-imp.reload(node_graphics_view)
-
-from node_graphics_view import QDMGraphicsView
-
-
-from node_graphics_scene import QDMGraphicsScene
+from node_object import Node
+from scene_object import Scene
+from graphics_view import QDMGraphicsView
 
 
 class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
@@ -29,17 +21,18 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
 
-        self.gr_scene = QDMGraphicsScene()
+        self.scene = Scene()
 
-        self.view = QDMGraphicsView(self.gr_scene, self)
-        self.view.setScene(self.gr_scene)
+        node = Node(self.scene, "My Awesome Node")
+
+        self.view = QDMGraphicsView(self.scene.gr_scene, self)
         self.layout.addWidget(self.view)
 
         # create graphic view
 
         self.show()
 
-        self.addDebugContent()
+        # self.addDebugContent()
 
     def addDebugContent(self):
         greenBrush = QBrush(Qt.green)
@@ -71,12 +64,23 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 '''
 #to work in maya launch this
 import sys
+import inspect
+
+for module in list(sys.modules):
+    module_path = None
+    try:
+        module_path = inspect.getfile(sys.modules[module])
+        if "maya_node_editor" in module_path:
+            sys.modules.pop(module_path)
+    except:
+        continue
+
+import sys
 sys.path.insert(0, "C:/Users/golub/Documents/maya_node_editor")
+from editor_window import NodeEditorWindow
 
-import node_editor_window
-import imp
-imp.reload(node_editor_window)
+wnd = NodeEditorWindow()
 
-wnd = node_editor_window.NodeEditorWindow()
 wnd.init_ui()
+
 '''

@@ -6,8 +6,10 @@ from PySide2.QtGui import *
 
 
 class QDMGraphicsScene(QGraphicsScene):
-    def __init__(self):
-        super(QDMGraphicsScene, self).__init__()
+    def __init__(self, scene, parent=None):
+        super(QDMGraphicsScene, self).__init__(parent)
+
+        self.scene = scene
 
         self.enable_grid = True
         self.additional_grid = True
@@ -25,18 +27,16 @@ class QDMGraphicsScene(QGraphicsScene):
         self._pen_dark = QPen(self._color_dark)
         self._pen_dark.setWidth(2)
 
-        # scene size
-        self.scene_width, self.scene_height = 64000, 64000
+        self.setBackgroundBrush(self._color_background)
 
+    def set_gr_scene(self, width, height):
         # scene center focus
         self.setSceneRect(
-            -self.scene_width//2,
-            -self.scene_height//2,
-            self.scene_width,
-            self.scene_height
+            -width//2,
+            -height//2,
+            width,
+            height
         )
-
-        self.setBackgroundBrush(self._color_background)
 
     def drawBackground(self, painter, rect):
         super(QDMGraphicsScene, self).drawBackground(painter, rect)
