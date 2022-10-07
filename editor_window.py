@@ -29,7 +29,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.layout.addWidget(self.view)
 
         # create graphic view
-
+        self.setWindowTitle("Node Editor")
         self.show()
 
         # self.addDebugContent()

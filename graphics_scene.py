@@ -11,8 +11,8 @@ class QDMGraphicsScene(QGraphicsScene):
 
         self.scene = scene
 
-        self.enable_grid = True
-        self.additional_grid = True
+        self.enable_grid = False
+        self.additional_grid = False
 
         self.grid_size = 20
         self.grid_squares = 5
