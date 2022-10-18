@@ -7,9 +7,10 @@ if __name__ == "__main__":
         try:
             module_path = inspect.getfile(sys.modules[module])
             if "maya_node_editor" in module_path:
-                reload(module)
+                sys.modules.pop(module)
+                del module
+                # reload(module)
         except Exception as e:
-            print(e)
             continue
 
     import sys

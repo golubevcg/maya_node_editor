@@ -11,6 +11,7 @@ from graphics_view import QDMGraphicsView
 class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
     def __init__(self, *args, **kwargs):
         super(NodeEditorWindow, self).__init__(*args, **kwargs)
+
         self.init_ui()
 
     def init_ui(self):
@@ -19,11 +20,19 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
         self.scene = Scene()
 
-        node = Node(self.scene, "My Awesome Node")
+        node = Node(self.scene, "My SuperNode", "node type")
+        # node = Node(self.scene, "BoxShape1", "mesh")
+        # node = Node(self.scene, "group1", "transform")
+        # node = Node(self.scene, "pPlatonicShape1", "mesh")
+
+        self.navigation_bar = QHBoxLayout()
+        self.init_navigation_bar()
+        self.layout.addLayout(self.navigation_bar)
 
         self.view = QDMGraphicsView(self.scene.gr_scene, self)
         self.layout.addWidget(self.view)
@@ -33,6 +42,13 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
         # self.addDebugContent()
+
+    def init_navigation_bar(self):
+        self.navigation_bar.setContentsMargins(0, 0, 0, 0)
+        button1 = QPushButton("test_button1")
+        button2 = QPushButton("test_button2")
+        self.navigation_bar.addWidget(button1)
+        self.navigation_bar.addWidget(button2)
 
     def addDebugContent(self):
         greenBrush = QBrush(Qt.green)
@@ -60,27 +76,3 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         line = self.gr_scene.addLine(-200, -200, 400, -100, outlinePen)
         line.setFlag(QGraphicsItem.ItemIsMovable)
         line.setFlag(QGraphicsItem.ItemIsSelectable)
-
-'''
-#to work in maya launch this
-import sys
-import inspect
-
-for module in list(sys.modules):
-    module_path = None
-    try:
-        module_path = inspect.getfile(sys.modules[module])
-        if "maya_node_editor" in module_path:
-            sys.modules.pop(module_path)
-    except:
-        continue
-
-import sys
-sys.path.insert(0, "C:/Users/golub/Documents/maya_node_editor")
-from editor_window import NodeEditorWindow
-
-wnd = NodeEditorWindow()
-
-wnd.init_ui()
-
-'''
