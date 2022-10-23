@@ -26,7 +26,9 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.scene = Scene()
 
         node = Node(self.scene, "My SuperNode", "node type")
-        # node = Node(self.scene, "BoxShape1", "mesh")
+        node.set_position(-75, -100)
+        node1 = Node(self.scene, "BoxShape1", "mesh")
+        node1.set_position(-75, 150)
         # node = Node(self.scene, "group1", "transform")
         # node = Node(self.scene, "pPlatonicShape1", "mesh")
 

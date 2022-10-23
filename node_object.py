@@ -16,3 +16,6 @@ class Node:
 
         self.inputs = []
         self.outputs = []
+
+    def set_position(self, x, y):
+        self.gr_node.setPos(x,y)
