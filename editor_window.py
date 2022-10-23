@@ -3,6 +3,7 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
+from edge_object import Edge
 from node_object import Node
 from scene_object import Scene
 from graphics_view import QDMGraphicsView
@@ -25,12 +26,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.scene = Scene()
 
-        node = Node(self.scene, "My SuperNode", "node type")
-        node.set_position(-75, -100)
-        node1 = Node(self.scene, "BoxShape1", "mesh")
-        node1.set_position(-75, 150)
-        # node = Node(self.scene, "group1", "transform")
-        # node = Node(self.scene, "pPlatonicShape1", "mesh")
+        self.add_nodes()
 
         self.navigation_bar = QHBoxLayout()
         self.init_navigation_bar()
@@ -44,6 +40,18 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
         # self.addDebugContent()
+
+    def add_nodes(self):
+        node = Node(self.scene, "My SuperNode", "node type")
+        node.set_position(-75, -100)
+        node.add_input_connection("input_1")
+
+        node1 = Node(self.scene, "BoxShape1", "mesh")
+        node1.set_position(-75, 150)
+        node1.add_output_connection("output_1")
+
+        edge1 = Edge(self.scene, node, "input_1", node1, "output_1")
+        edge2 = Edge(self.scene, node, "input_1", node1, "output_1", type = 2)
 
     def init_navigation_bar(self):
         self.navigation_bar.setContentsMargins(0, 0, 0, 0)

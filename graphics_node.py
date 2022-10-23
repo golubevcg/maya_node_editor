@@ -2,7 +2,8 @@ from PySide2.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWi
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
-from socket_object import QDMGraphicsSocket
+from graphics_socket import QDMGraphicsSocket
+from socket_object import Socket
 
 
 class QDMGraphicsNode(QGraphicsItem):
@@ -48,15 +49,6 @@ class QDMGraphicsNode(QGraphicsItem):
         self.title = self.node.title
         self.node_type_title = self.node.type
 
-        # init sockets
-        self._socket_height = 20
-        self.init_sockets_input()
-        self.init_sockets_output()
-
-
-        # init content
-        # self.init_content()
-
         self.init_ui()
 
     def boundingRect(self):
@@ -70,22 +62,6 @@ class QDMGraphicsNode(QGraphicsItem):
     def init_ui(self):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemIsMovable)
-
-    def init_sockets_input(self):
-        # self.title_item = QGraphicsTextItem(self)
-        # self.title_item.setDefaultTextColor(self._title_color)
-        # self.title_item.setFont(self._title_font)
-        # self.title_x_pos = self.width / 2 - self.title_width / 2
-        # self.title_item.setPos(self.title_x_pos, 0)
-        self.input_socket = QDMGraphicsSocket(self.width, self._socket_height, x=0, y=-self._socket_height, parent=self)
-
-    def init_sockets_output(self):
-        # self.title_item = QGraphicsTextItem(self)
-        # self.title_item.setDefaultTextColor(self._title_color)
-        # self.title_item.setFont(self._title_font)
-        # self.title_x_pos = self.width / 2 - self.title_width / 2
-        # self.title_item.setPos(self.title_x_pos, 0)
-        self.output_socket = QDMGraphicsSocket(self.width, self._socket_height, x=0, y=self.height, parent=self)
 
     def init_title(self):
         self.title_item = QGraphicsTextItem(self)

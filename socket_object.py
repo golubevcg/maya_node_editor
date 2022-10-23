@@ -1,39 +1,27 @@
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QPen, QBrush
+
+from graphics_socket import QDMGraphicsSocket
+
+POSSIBLE_POSITIONS = {
+    "TOP",
+    "BOTTOM"
+}
 
 
-class QDMGraphicsSocket(QGraphicsItem):
-    def __init__(self, width, height, x=0, y=0, parent=None):
-        super(QDMGraphicsSocket, self).__init__(parent)
+class Socket:
+    def __init__(self, node, height, parent=None, position="TOP"):
 
-        self.width = width
+        self.node = node
+        if position not in POSSIBLE_POSITIONS:
+            raise ValueError("Position must be on of the Possible Position constant values")
+
+        self.position = position
+
+        self.width = self.node.gr_node.width
         self.height = height
-        self._pen = QPen(Qt.black)
-        self._brush = QBrush(Qt.transparent)
-        self._x = x
-        self._y = y
 
-    def paint(self, painter, QStyleOptionGraphicsItem, widget=None):
-        path_outline = QPainterPath()
-        path_outline.setFillRule(Qt.WindingFill)
-        path_outline.addRoundedRect(
-            self._x,
-            self._y,
-            self.width,
-            self.height,
-            0,
-            0
-        )
+        self.gr_socket = QDMGraphicsSocket(self.node.gr_node, self.height)
+        self.gr_socket.setPos(*self.node.get_socket_position(self.position))
 
-        painter.setBrush(self._brush)
-        painter.setPen(self._pen)
-        painter.drawPath(path_outline.simplified())
-
-    def boundingRect(self):
-        return QRectF(
-            self._x,
-            self._y,
-            self.width + self._x,
-            self.height + self._y
-        )
+        self.edge = None
