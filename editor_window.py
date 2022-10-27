@@ -43,15 +43,16 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
     def add_nodes(self):
         node = Node(self.scene, "My SuperNode", "node type")
-        node.set_position(-75, -100)
-        node.add_input_connection("input_1")
+        node.set_position(-75, -250)
 
         node1 = Node(self.scene, "BoxShape1", "mesh")
-        node1.set_position(-75, 150)
-        node1.add_output_connection("output_1")
+        node1.set_position(-250, -30)
+
+        node2 = Node(self.scene, "joint1", "joint")
+        node2.set_position(-75, 175)
 
         edge1 = Edge(self.scene, node, "input_1", node1, "output_1")
-        edge2 = Edge(self.scene, node, "input_1", node1, "output_1", type = 2)
+        edge2 = Edge(self.scene, node1, "input_1", node2, "output_1", type=2)
 
     def init_navigation_bar(self):
         self.navigation_bar.setContentsMargins(0, 0, 0, 0)
