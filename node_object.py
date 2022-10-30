@@ -59,5 +59,6 @@ class Node:
         if self.output_connections:
             all_connections.extend(self.output_connections)
 
-        for edge in all_connections:
-            edge.update_positions()
+        if all_connections:
+            for edge in all_connections:
+                edge.update_positions()

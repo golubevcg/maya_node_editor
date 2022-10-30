@@ -88,6 +88,10 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.gr_content.setWidget(self.content)
 
+    def mouseMoveEvent(self, event):
+        super(QDMGraphicsNode, self).mouseMoveEvent(event)
+        self.node.update_edge_positions()
+
     @property
     def title(self):
         return self._title

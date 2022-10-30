@@ -54,6 +54,7 @@ class QDMGraphicsEdgeDirect(QDMGraphicsEdge):
         path.lineTo(self.pos_destination[0], self.pos_destination[1])
         self.setPath(path)
 
+
 class QDMGraphicsEdgeBezier(QDMGraphicsEdge):
     def update_path(self):
         s = self.pos_source
@@ -61,7 +62,6 @@ class QDMGraphicsEdgeBezier(QDMGraphicsEdge):
 
         dist = (d[0] - s[0]) * 0.5
         if s[0] > d[0]: dist *= -1
-
 
         path = QPainterPath(QPointF(self.pos_source[0], self.pos_source[1]))
         path.cubicTo(

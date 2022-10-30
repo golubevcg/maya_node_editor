@@ -11,7 +11,7 @@ class Edge:
                  source_connection_name,
                  node_destination,
                  destination_connection_name,
-                 type=1):
+                 edge_type=1):
         self.scene = scene
 
         self.node_start = node_start
@@ -20,7 +20,7 @@ class Edge:
         self.node_destination = node_destination
         self.destination_connection_name = destination_connection_name
 
-        self.gr_edge = QDMGraphicsEdgeDirect(self) if type == EDGE_TYPE_DIRECT else QDMGraphicsEdgeBezier(self)
+        self.gr_edge = QDMGraphicsEdgeDirect(self) if edge_type == EDGE_TYPE_DIRECT else QDMGraphicsEdgeBezier(self)
         self.scene.gr_scene.addItem(self.gr_edge)
 
         self.node_start.add_output_connection(self)
@@ -41,7 +41,7 @@ class Edge:
             end_pos = self.node_destination.input_socket.get_socket_position()
 
             end_pos[0] += self.node_destination.gr_node.pos().x() + self.node_destination.gr_node.width / (len(self.node_destination.input_connections)+1)
-            end_pos[1] += self.node_destination.gr_node.pos().y()
+            end_pos[1] += self.node_destination.gr_node.pos().y() + self.node_start.socket_height
 
             self.gr_edge.set_destination(*end_pos)
 

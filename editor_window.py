@@ -52,7 +52,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         node2.set_position(-75, 175)
 
         edge1 = Edge(self.scene, node, "input_1", node1, "output_1")
-        edge2 = Edge(self.scene, node1, "input_1", node2, "output_1", type=2)
+        edge2 = Edge(self.scene, node1, "input_1", node2, "output_1")
 
     def init_navigation_bar(self):
         self.navigation_bar.setContentsMargins(0, 0, 0, 0)

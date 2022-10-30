@@ -2,6 +2,13 @@ from PySide2.QtWidgets import QGraphicsView
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
+from graphics_socket import QDMGraphicsSocket
+
+MODE_NOOP = 1
+MODE_EDGE_DRAG = 2
+
+EDGE_DRAG_START_THRESHOLD = 10
+
 
 class QDMGraphicsView(QGraphicsView):
     def __init__(self, gr_scene, parent=None):
@@ -12,6 +19,8 @@ class QDMGraphicsView(QGraphicsView):
         self.init_ui()
 
         self.setScene(self.gr_scene)
+
+        self.mode = MODE_NOOP
 
         self.zoom_in_factor = 1.25
         self.zoom_clamp = True
@@ -89,16 +98,56 @@ class QDMGraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.NoDrag)
 
     def left_mouse_button_press(self, event):
-        return super(QDMGraphicsView, self).mousePressEvent(event)
+        # get item which we clicked on
+        self.click_pressed_item = self.get_item_at_click(event)
+
+        # store position of last LMB button click
+        self.last_lmb_click_scene_pos = self.mapToScene(event.pos())
+        if isinstance(self.click_pressed_item, QDMGraphicsSocket):
+            if self.mode == MODE_NOOP:
+                self.mode = MODE_EDGE_DRAG
+                self.edge_drag_start(self.click_pressed_item)
+                return
+
+        if self.mode == MODE_EDGE_DRAG:
+            # IT IS WRONG THIS CHECK IS WRONG
+            result = self.edge_drag_end(self.click_pressed_item)
+            if result: return
+
+        super(QDMGraphicsView, self).mousePressEvent(event)
 
     def left_mouse_button_release(self, event):
-        return super(QDMGraphicsView, self).mouseReleaseEvent(event)
+        # get item which we released
+        click_released_item = self.get_item_at_click(event)
+        if self.mode == MODE_EDGE_DRAG:
+            # checking that we are not trying to connect same sockets together
+            if self.pressed_item != click_released_item:
+                result = self.edge_drag_end(click_released_item)
+                if result: return
+
+        super(QDMGraphicsView, self).mouseReleaseEvent(event)
+
+    def edge_drag_end(self, item):
+        """return True if skip the rest of the code"""
+        self.mode = MODE_NOOP
+        print("End dragging edge")
+
+        # HERE YOU NEED TO DOUBLE CHECK THAT SOCKET TYPE
+        # so always input socket will be to outsocket
+        print("self.pressed_item.socket_obj.position:", self.pressed_item.socket_obj.position)
+        print("item.socket_obj.position:", item.socket_obj.position)
+        check_sockets_not_same = self.pressed_item.socket_obj.position != item.socket_obj.position
+        if isinstance(self.pressed_item, QDMGraphicsSocket) and check_sockets_not_same:
+            print("    Assign end socket")
+            return True
+
+        return False
 
     def right_mouse_button_press(self, event):
-        return super(QDMGraphicsView, self).mousePressEvent(event)
+        super(QDMGraphicsView, self).mousePressEvent(event)
 
     def right_mouse_button_release(self, event):
-        return super(QDMGraphicsView, self).mouseReleaseEvent(event)
+        super(QDMGraphicsView, self).mouseReleaseEvent(event)
 
     def wheelEvent(self, event):
         # calculate our zoom Factor
@@ -124,3 +173,20 @@ class QDMGraphicsView(QGraphicsView):
         # set scene scale
         if not clamped or self.zoom_clamp is False:
             self.scale(zoom_factor, zoom_factor)
+
+    def get_item_at_click(self, event):
+        """returns item over which mouse was clicked"""
+        pos = event.pos()
+        obj = self.itemAt(pos)
+        return obj
+
+    def distance_between_click_and_release_is_off(self, event):
+        """measures if we are too far from the las LMB click scene position"""
+        new_lmb_pos_release_scene_pos = self.mapToScene(event.pos())
+        dist_scene_pos = new_lmb_pos_release_scene_pos - self.last_lmb_click_scene_pos
+        vector_length_without_sqrt = (dist_scene_pos.x() * dist_scene_pos.x() + dist_scene_pos.y()*dist_scene_pos.y())
+        return vector_length_without_sqrt < EDGE_DRAG_START_THRESHOLD ** 2
+
+    def edge_drag_start(self, item):
+        print "Started dragging edges"
+        print "    Assign start socket"

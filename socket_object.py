@@ -21,7 +21,7 @@ class Socket:
         self.width = self.node.gr_node.width
         self.height = height
 
-        self.gr_socket = QDMGraphicsSocket(self.node.gr_node, self.height)
+        self.gr_socket = QDMGraphicsSocket(self.node.gr_node, self.height, self)
         self.gr_socket.setPos(*self.node.get_socket_position(self.position))
 
         self.connected_edges = []
