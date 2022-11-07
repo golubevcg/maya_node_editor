@@ -21,7 +21,7 @@ class Socket:
         self.width = self.node.gr_node.width
         self.height = height
 
-        self.gr_socket = QDMGraphicsSocket(self.node.gr_node, self.height, self)
+        self.gr_socket = QDMGraphicsSocket(self)
         self.gr_socket.setPos(*self.node.get_socket_position(self.position))
 
         self.connected_edges = []
@@ -34,3 +34,6 @@ class Socket:
 
     def remove_connected_edge(self, edge):
         self.connected_edges.remove(edge)
+
+    def __str__(self):
+        return "<Socket %s..%s>" % (hex(id(self))[2:5], hex(id(self))[-3:])

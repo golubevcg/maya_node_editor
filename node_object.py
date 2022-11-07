@@ -62,3 +62,6 @@ class Node:
         if all_connections:
             for edge in all_connections:
                 edge.update_positions()
+
+    def __str__(self):
+        return "<Node %s..%s>" % (hex(id(self))[2:5], hex(id(self))[-3:])

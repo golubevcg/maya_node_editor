@@ -2,6 +2,7 @@ from PySide2.QtWidgets import QGraphicsView
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
+from edge_object import Edge
 from graphics_socket import QDMGraphicsSocket
 
 MODE_NOOP = 1
@@ -121,7 +122,7 @@ class QDMGraphicsView(QGraphicsView):
         click_released_item = self.get_item_at_click(event)
         if self.mode == MODE_EDGE_DRAG:
             # checking that we are not trying to connect same sockets together
-            if self.pressed_item != click_released_item:
+            if self.click_pressed_item != click_released_item:
                 result = self.edge_drag_end(click_released_item)
                 if result: return
 
@@ -134,10 +135,10 @@ class QDMGraphicsView(QGraphicsView):
 
         # HERE YOU NEED TO DOUBLE CHECK THAT SOCKET TYPE
         # so always input socket will be to outsocket
-        print("self.pressed_item.socket_obj.position:", self.pressed_item.socket_obj.position)
-        print("item.socket_obj.position:", item.socket_obj.position)
-        check_sockets_not_same = self.pressed_item.socket_obj.position != item.socket_obj.position
-        if isinstance(self.pressed_item, QDMGraphicsSocket) and check_sockets_not_same:
+        print("self.click_pressed_item.socket_obj.position:", self.click_pressed_item.socket_obj.position)
+        # print("item.socket_obj.position:", item.socket_obj.position)
+        check_sockets_not_same = self.click_pressed_item.socket_obj.position != item.socket_obj.position
+        if isinstance(self.click_pressed_item, QDMGraphicsSocket) and check_sockets_not_same:
             print("    Assign end socket")
             return True
 
@@ -145,6 +146,10 @@ class QDMGraphicsView(QGraphicsView):
 
     def right_mouse_button_press(self, event):
         super(QDMGraphicsView, self).mousePressEvent(event)
+
+        item = self.get_item_at_click(event)
+
+        print("RMB: DEBUG", item)
 
     def right_mouse_button_release(self, event):
         super(QDMGraphicsView, self).mouseReleaseEvent(event)
@@ -190,3 +195,17 @@ class QDMGraphicsView(QGraphicsView):
     def edge_drag_start(self, item):
         print "Started dragging edges"
         print "    Assign start socket"
+
+        self.drag_edge = Edge(
+            self.gr_scene.scene,
+            item.socket_obj.node,
+            edge_type=1
+        )
+
+    def mouseMoveEvent(self, event):
+        if self.mode == MODE_EDGE_DRAG:
+            pos = self.mapToScene(event.pos())
+            self.drag_edge.gr_edge.set_destination(pos.x(), pos.y())
+            self.drag_edge.gr_edge.update()
+
+        super(QDMGraphicsView, self).mouseMoveEvent(event)
