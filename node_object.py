@@ -44,6 +44,13 @@ class Node:
         self.update_edge_positions()
 
     # TODO: WRITE REMOVE CONNECTION
+    def remove_connection(self, edge_object):
+        if edge_object in self.input_connections:
+            self.input_connections.remove(edge_object)
+        elif edge_object in self.output_connections:
+            self.output_connections.remove(edge_object)
+
+        self.update_edge_positions()
 
     def get_socket_position(self, position):
         if position not in POSSIBLE_POSITIONS:
@@ -55,9 +62,7 @@ class Node:
             return [0, self.gr_node.height]
 
     def update_edge_positions(self):
-        all_connections = self.input_connections[:]
-        if self.output_connections:
-            all_connections.extend(self.output_connections)
+        all_connections = self.get_all_connections()
 
         if all_connections:
             for edge in all_connections:
@@ -65,3 +70,10 @@ class Node:
 
     def __str__(self):
         return "<Node %s..%s>" % (hex(id(self))[2:5], hex(id(self))[-3:])
+
+    def get_all_connections(self):
+        all_connections = self.input_connections[:]
+        if self.output_connections:
+            all_connections.extend(self.output_connections)
+
+        return all_connections

@@ -128,22 +128,6 @@ class QDMGraphicsView(QGraphicsView):
 
         super(QDMGraphicsView, self).mouseReleaseEvent(event)
 
-    def edge_drag_end(self, item):
-        """return True if skip the rest of the code"""
-        self.mode = MODE_NOOP
-        print("End dragging edge")
-
-        # HERE YOU NEED TO DOUBLE CHECK THAT SOCKET TYPE
-        # so always input socket will be to outsocket
-        print("self.click_pressed_item.socket_obj.position:", self.click_pressed_item.socket_obj.position)
-        # print("item.socket_obj.position:", item.socket_obj.position)
-        check_sockets_not_same = self.click_pressed_item.socket_obj.position != item.socket_obj.position
-        if isinstance(self.click_pressed_item, QDMGraphicsSocket) and check_sockets_not_same:
-            print("    Assign end socket")
-            return True
-
-        return False
-
     def right_mouse_button_press(self, event):
         super(QDMGraphicsView, self).mousePressEvent(event)
 
@@ -202,8 +186,36 @@ class QDMGraphicsView(QGraphicsView):
             edge_type=1
         )
 
+    def edge_drag_end(self, item):
+        """return True if skip the rest of the code"""
+        self.mode = MODE_NOOP
+        print("End dragging edge")
+
+        # HERE YOU NEED TO DOUBLE CHECK THAT SOCKET TYPE
+        # so always input socket will be to outsocket
+        print("isinstance(self.click_pressed_item, QDMGraphicsSocket):", isinstance(self.click_pressed_item, QDMGraphicsSocket))
+        if isinstance(self.click_pressed_item, QDMGraphicsSocket):
+            print("isinstance(item, QDMGraphicsSocket):", isinstance(item, QDMGraphicsSocket))
+            print(type(item))
+            if isinstance(item, QDMGraphicsSocket) and self.click_pressed_item.socket_obj.position != item.socket_obj.position:
+                print("    Assign end socket")
+                self.drag_edge.node_destination = item.socket_obj.node
+                self.drag_edge.node_start.add_output_connection(self.drag_edge)
+                self.drag_edge.node_destination.add_input_connection(self.drag_edge)
+                print("Assign start and end sockets to for edge")
+                self.mode = MODE_NOOP
+                return True
+
+        print("end dragging edge")
+        if self.drag_edge:
+            self.drag_edge.remove()
+            self.drag_edge = None
+
+        print("self.drag_edge removed")
+        return False
+
     def mouseMoveEvent(self, event):
-        if self.mode == MODE_EDGE_DRAG:
+        if self.mode == MODE_EDGE_DRAG and self.drag_edge:
             pos = self.mapToScene(event.pos())
             self.drag_edge.gr_edge.set_destination(pos.x(), pos.y())
             self.drag_edge.gr_edge.update()

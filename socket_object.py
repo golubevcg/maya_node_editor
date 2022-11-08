@@ -33,7 +33,10 @@ class Socket:
         self.connected_edges.append(edge)
 
     def remove_connected_edge(self, edge):
-        self.connected_edges.remove(edge)
+        if self.connected_edges and edge in self.connected_edges:
+            self.connected_edges.remove(edge)
+
+        self.node.remove_connection(edge)
 
     def __str__(self):
         return "<Socket %s..%s>" % (hex(id(self))[2:5], hex(id(self))[-3:])

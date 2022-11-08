@@ -32,11 +32,16 @@ class Edge:
         self.update_positions()
 
     def update_positions(self):
+        if not self.gr_edge:
+            return
 
         source_pos = None
         if self.node_start and self.node_start.output_connections:
             source_pos = self.node_start.output_socket.get_socket_position()
-            source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections)+1)
+            if self.node_destination or len(self.node_start.output_connections)==1:
+                source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections)+1)
+            else:
+                source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections))
             source_pos[1] += self.node_start.gr_node.pos().y()
 
             self.gr_edge.set_source(*source_pos)
@@ -57,6 +62,8 @@ class Edge:
     def remove_from_sockets(self):
         if self.node_start:
             self.node_start.output_socket.remove_connected_edge(self)
+            # remove from node this connection
+            # update edge positions for node
 
         if self.node_destination:
             self.node_destination.input_socket.remove_connected_edge(self)
