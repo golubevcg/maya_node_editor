@@ -25,7 +25,7 @@ class QDMGraphicsView(QGraphicsView):
 
         self.zoom_in_factor = 1.25
         self.zoom_clamp = True
-        self.zoom = 10
+        self.zoom = 5
         self.zoom_step = 1
         self.zoom_range = [0, 10]
 
@@ -121,6 +121,7 @@ class QDMGraphicsView(QGraphicsView):
         # get item which we released
         click_released_item = self.get_item_at_click(event)
         if self.mode == MODE_EDGE_DRAG:
+
             # checking that we are not trying to connect same sockets together
             if self.click_pressed_item != click_released_item:
                 result = self.edge_drag_end(click_released_item)
@@ -217,7 +218,7 @@ class QDMGraphicsView(QGraphicsView):
     def mouseMoveEvent(self, event):
         if self.mode == MODE_EDGE_DRAG and self.drag_edge:
             pos = self.mapToScene(event.pos())
-            self.drag_edge.gr_edge.set_destination(pos.x(), pos.y())
+            self.drag_edge.gr_edge.set_destination(pos.x()-1, pos.y()-1)
             self.drag_edge.gr_edge.update()
 
         super(QDMGraphicsView, self).mouseMoveEvent(event)

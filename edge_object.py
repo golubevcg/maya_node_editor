@@ -42,7 +42,7 @@ class Edge:
                 source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections)+1)
             else:
                 source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections))
-            source_pos[1] += self.node_start.gr_node.pos().y()
+            source_pos[1] += self.node_start.gr_node.pos().y() + 3
 
             self.gr_edge.set_source(*source_pos)
 
@@ -50,7 +50,7 @@ class Edge:
             end_pos = self.node_destination.input_socket.get_socket_position()
 
             end_pos[0] += self.node_destination.gr_node.pos().x() + self.node_destination.gr_node.width / (len(self.node_destination.input_connections)+1)
-            end_pos[1] += self.node_destination.gr_node.pos().y() + self.node_start.socket_height
+            end_pos[1] += self.node_destination.gr_node.pos().y() + self.node_start.socket_height - 3
 
             self.gr_edge.set_destination(*end_pos)
         else:

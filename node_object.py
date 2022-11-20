@@ -36,12 +36,14 @@ class Node:
         self.gr_node.setPos(x, y)
 
     def add_input_connection(self, edge_object):
-        self.input_connections.append(edge_object)
-        self.update_edge_positions()
+        if edge_object not in self.input_connections:
+            self.input_connections.append(edge_object)
+            self.update_edge_positions()
 
     def add_output_connection(self, edge_object):
-        self.output_connections.append(edge_object)
-        self.update_edge_positions()
+        if edge_object not in self.output_connections:
+            self.output_connections.append(edge_object)
+            self.update_edge_positions()
 
     # TODO: WRITE REMOVE CONNECTION
     def remove_connection(self, edge_object):

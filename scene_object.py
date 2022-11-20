@@ -1,4 +1,5 @@
 from graphics_scene import QDMGraphicsScene
+from PySide2.QtGui import *
 
 
 class Scene:
@@ -13,6 +14,7 @@ class Scene:
 
     def init_ui(self):
         self.gr_scene = QDMGraphicsScene(self)
+        self.gr_scene.setBackgroundBrush(QColor("#303030"))
         self.gr_scene.set_gr_scene(self.scene_width, self.scene_height)
 
     def add_node(self, node):

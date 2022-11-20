@@ -11,11 +11,11 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         self._pen = None
         self.edge = edge
 
-        self._color = QColor("#000000")
+        self._color = QColor("#5f777f")
         self._color_selected = QColor("#FFFFA637")
 
         self._pen = QPen(self._color)
-        self._pen.setWidth(2.0)
+        self._pen.setWidth(2)
 
         self._pen_selected = QPen(self._color_selected)
         self._pen_selected.setWidth(2.0)
@@ -42,16 +42,24 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         painter.setPen(self._pen if not self.isSelected() else self._pen_selected)
         painter.setBrush(Qt.NoBrush)
 
-        painter.drawPath(self.path())
+        path = painter.drawPath(self.path())
+
+
+        arrow_position = self.path().pointAtPercent(1)
+        arrow_position = [arrow_position.x(), arrow_position.y()]
 
         # change path.PointAtPercent() value to move arrow on the line
         triangle_source = self.arrowCalc(
             self.pos_source,
-            self.path().pointAtPercent(0.5)
+            arrow_position,
+            self.path()
         )
 
         if triangle_source is not None:
-            painter.drawPolyline(triangle_source)
+            painter.setPen(self._pen)
+            painter.setBrush(self._color)
+
+            painter.drawPolygon(triangle_source)
 
     def update_path(self):
         # will handle drawing qpainter path from point a to point b
@@ -63,43 +71,34 @@ class QDMGraphicsEdge(QGraphicsPathItem):
     def set_destination(self, x, y):
         self.pos_destination = [x, y]
 
-    def arrowCalc(self, start_point=None, end_point=None):  # calculates the point where the arrow should be drawn
+    def arrowCalc(self, end_point=None, start_point=None, line=None):
+        # calculates the point where the arrow should be drawn
+        arrow_size = 12
 
-        # TODO: REWORK THIS FUNC
-        try:
-            if start_point is None:
-                start_point = self.pos_source
+        p1 = line.elementAt(0)
+        p2 = line.elementAt(1)
 
-            if end_point is None:
-                end_point = self.pos_destination
+        dx, dy = end_point[0] - start_point[0], end_point[1] - start_point[1]
 
-            if isinstance(start_point, list):
-                start_point = QPointF(start_point[0], start_point[1])
+        angle = math.atan2(-dy, dx)
 
-            if isinstance(end_point, list):
-                end_point = QPointF(end_point[0], end_point[1])
+        PI_CONSTANT = math.pi
 
-            dx, dy = start_point.x() - end_point.x(), start_point.y() - end_point.y()
+        qpointf_start_point = QPointF(*start_point)
 
-            leng = math.sqrt(dx ** 2 + dy ** 2)
-            normX, normY = dx / leng, dy / leng  # normalize
+        arrowP1 = QPointF(
+            qpointf_start_point + QPointF(math.sin(angle + PI_CONSTANT / 3) * arrow_size,
+            math.cos(angle + PI_CONSTANT / 3) * arrow_size)
+        )
 
-            # perpendicular vector
-            perpX = -normY
-            perpY = normX
+        arrowP2 = QPointF(
+            qpointf_start_point + QPointF(
+                math.sin(angle + PI_CONSTANT - PI_CONSTANT / 3) * arrow_size,
+                math.cos(angle + PI_CONSTANT - PI_CONSTANT / 3) * arrow_size)
+        )
 
-            leftX = end_point.x() + self._arrow_height * normX + self._arrow_width * perpX
-            leftY = end_point.y() + self._arrow_height * normY + self._arrow_width * perpY
-
-            rightX = end_point.x() + self._arrow_height * normX - self._arrow_width * perpX
-            rightY = end_point.y() + self._arrow_height * normY - self._arrow_width * perpY
-
-            point2 = QPointF(leftX, leftY)
-            point3 = QPointF(rightX, rightY)
-
-            return QPolygonF([point2, end_point, point3])
-        except (ZeroDivisionError, Exception) as e:
-            return None
+        # arrow_head = QPolygonF(line.p1() << arrowP1 << arrowP2)
+        return QPolygonF([qpointf_start_point, arrowP1, arrowP2])
 
 
 class QDMGraphicsEdgeDirect(QDMGraphicsEdge):
