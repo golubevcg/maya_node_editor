@@ -1,8 +1,9 @@
-from PySide2.QtWidgets import QGraphicsView
+from PySide2.QtWidgets import QGraphicsView, QLineEdit
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from edge_object import Edge
+from graphics_node import QDMGraphicsNode
 from graphics_socket import QDMGraphicsSocket
 
 MODE_NOOP = 1
@@ -28,6 +29,7 @@ class QDMGraphicsView(QGraphicsView):
         self.zoom = 5
         self.zoom_step = 1
         self.zoom_range = [0, 10]
+        self.EDGE_TYPE_GLOBAL = 2
 
     def init_ui(self):
         self.setRenderHints(
@@ -110,6 +112,12 @@ class QDMGraphicsView(QGraphicsView):
                 self.edge_drag_start(self.click_pressed_item)
                 return
 
+        print("isinstance(self.click_pressed_item, QDMGraphicsNode)", isinstance(self.click_pressed_item, QDMGraphicsNode))
+        print(type(self.click_pressed_item))
+        if isinstance(self.click_pressed_item, QDMGraphicsNode):
+            print("inp conn length:", len(self.click_pressed_item.node.input_connections))
+            print("out conn length:", len(self.click_pressed_item.node.output_connections))
+
         if self.mode == MODE_EDGE_DRAG:
             # IT IS WRONG THIS CHECK IS WRONG
             result = self.edge_drag_end(self.click_pressed_item)
@@ -184,7 +192,7 @@ class QDMGraphicsView(QGraphicsView):
         self.drag_edge = Edge(
             self.gr_scene.scene,
             item.socket_obj.node,
-            edge_type=1
+            edge_type=self.EDGE_TYPE_GLOBAL
         )
 
     def edge_drag_end(self, item):
@@ -201,8 +209,8 @@ class QDMGraphicsView(QGraphicsView):
             if isinstance(item, QDMGraphicsSocket) and self.click_pressed_item.socket_obj.position != item.socket_obj.position:
                 print("    Assign end socket")
                 self.drag_edge.node_destination = item.socket_obj.node
-                self.drag_edge.node_start.add_output_connection(self.drag_edge)
                 self.drag_edge.node_destination.add_input_connection(self.drag_edge)
+                self.drag_edge.node_start.add_output_connection(self.drag_edge)
                 print("Assign start and end sockets to for edge")
                 self.mode = MODE_NOOP
                 return True
@@ -216,9 +224,23 @@ class QDMGraphicsView(QGraphicsView):
         return False
 
     def mouseMoveEvent(self, event):
+        pos = self.mapToScene(event.pos())
         if self.mode == MODE_EDGE_DRAG and self.drag_edge:
-            pos = self.mapToScene(event.pos())
             self.drag_edge.gr_edge.set_destination(pos.x()-1, pos.y()-1)
             self.drag_edge.gr_edge.update()
 
+        # item = self.itemAt(pos.x(), pos.y())
+        # print(type(item))
+        # if item == QDMGraphicsSocket:
+        #     print("SOCKEEEETTTT")
+
         super(QDMGraphicsView, self).mouseMoveEvent(event)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == Qt.Key_Tab:
+            self.reveal_tab_search()
+
+    def reveal_tab_search(self):
+        ql_edit = QLineEdit("tralala")
+        self.addWidget(ql_edit)

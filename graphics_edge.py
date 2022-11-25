@@ -1,6 +1,6 @@
 import math
 
-from PySide2.QtCore import Qt, QPointF
+from PySide2.QtCore import Qt, QPointF, QLineF
 from PySide2.QtWidgets import QGraphicsPathItem, QGraphicsItem
 from PySide2.QtGui import *
 
@@ -28,6 +28,8 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         self._arrow_height = 5
         self._arrow_width = 4
 
+        self.y_padding = 3
+
     def set_source(self, x, y):
         self.pos_source = [x, y]
 
@@ -42,16 +44,15 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         painter.setPen(self._pen if not self.isSelected() else self._pen_selected)
         painter.setBrush(Qt.NoBrush)
 
-        path = painter.drawPath(self.path())
+        painter.drawPath(self.path())
 
+        socket_radius = 3
+        painter.setPen(self._pen)
+        painter.setBrush(self._color)
+        painter.drawEllipse(QPointF(self.pos_source[0], self.pos_source[1]+3), socket_radius, socket_radius)
+        painter.drawEllipse(QPointF(self.pos_destination[0], self.pos_destination[1]-3), socket_radius, socket_radius)
 
-        arrow_position = self.path().pointAtPercent(1)
-        arrow_position = [arrow_position.x(), arrow_position.y()]
-
-        # change path.PointAtPercent() value to move arrow on the line
         triangle_source = self.arrowCalc(
-            self.pos_source,
-            arrow_position,
             self.path()
         )
 
@@ -66,39 +67,38 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         raise NotImplemented("This method has to be overriden in a child class")
 
     def set_source(self, x, y):
-        self.pos_source = [x, y]
+        self.pos_source = [x, y + self.y_padding]
 
     def set_destination(self, x, y):
-        self.pos_destination = [x, y]
+        self.pos_destination = [x, y - self.y_padding]
 
-    def arrowCalc(self, end_point=None, start_point=None, line=None):
+    def arrowCalc(self, line):
         # calculates the point where the arrow should be drawn
-        arrow_size = 12
+        arrow_size = 10
+        arrow_padding = 0.45
 
-        p1 = line.elementAt(0)
-        p2 = line.elementAt(1)
+        end_point = line.pointAtPercent(0.0 + arrow_padding)
 
-        dx, dy = end_point[0] - start_point[0], end_point[1] - start_point[1]
+        start_point = line.pointAtPercent(1.0 - arrow_padding)
+
+        dx, dy = end_point.x() - start_point.x(), end_point.y() - start_point.y()
 
         angle = math.atan2(-dy, dx)
 
         PI_CONSTANT = math.pi
 
-        qpointf_start_point = QPointF(*start_point)
-
         arrowP1 = QPointF(
-            qpointf_start_point + QPointF(math.sin(angle + PI_CONSTANT / 3) * arrow_size,
+            start_point + QPointF(math.sin(angle + PI_CONSTANT / 3) * arrow_size,
             math.cos(angle + PI_CONSTANT / 3) * arrow_size)
         )
 
         arrowP2 = QPointF(
-            qpointf_start_point + QPointF(
+            start_point + QPointF(
                 math.sin(angle + PI_CONSTANT - PI_CONSTANT / 3) * arrow_size,
                 math.cos(angle + PI_CONSTANT - PI_CONSTANT / 3) * arrow_size)
         )
 
-        # arrow_head = QPolygonF(line.p1() << arrowP1 << arrowP2)
-        return QPolygonF([qpointf_start_point, arrowP1, arrowP2])
+        return QPolygonF([start_point, arrowP1, arrowP2])
 
 
 class QDMGraphicsEdgeDirect(QDMGraphicsEdge):
@@ -110,19 +110,19 @@ class QDMGraphicsEdgeDirect(QDMGraphicsEdge):
 
 class QDMGraphicsEdgeBezier(QDMGraphicsEdge):
     def update_path(self):
-        s = self.pos_source
-        d = self.pos_destination
 
-        dist = (d[0] - s[0]) * 0.5
-        if s[0] > d[0]: dist *= -1
+        p0 = QPointF(*self.pos_source)
+        p1 = QPointF(*self.pos_destination)
 
-        path = QPainterPath(QPointF(self.pos_source[0], self.pos_source[1]))
+        # bezier_padding = 80*1.5
+        bezier_padding = 50
+
+        path = QPainterPath()
+        path.moveTo(p0)
         path.cubicTo(
-            s[0] + dist,
-            s[1],
-            d[0] - dist,
-            d[1],
-            self.pos_destination[0],
-            self.pos_destination[1]
+            QPointF(p0.x(), p0.y() + bezier_padding),
+            QPointF(p1.x(), p1.y() - bezier_padding),
+            p1
         )
+
         self.setPath(path)

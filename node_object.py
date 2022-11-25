@@ -38,12 +38,25 @@ class Node:
     def add_input_connection(self, edge_object):
         if edge_object not in self.input_connections:
             self.input_connections.append(edge_object)
+            self.gr_node.update_node_width()
             self.update_edge_positions()
 
     def add_output_connection(self, edge_object):
         if edge_object not in self.output_connections:
             self.output_connections.append(edge_object)
+            self.gr_node.update_node_width()
             self.update_edge_positions()
+
+    def update_edge_indexes(self):
+        if self.input_connections:
+            for index, edge_obj in enumerate(self.input_connections):
+                index += 2
+                edge_obj.input_connection_index = index
+
+        if self.output_connections:
+            for index, edge_obj in enumerate(self.output_connections):
+                index += 2
+                edge_obj.output_connection_index = index
 
     # TODO: WRITE REMOVE CONNECTION
     def remove_connection(self, edge_object):
@@ -52,6 +65,7 @@ class Node:
         elif edge_object in self.output_connections:
             self.output_connections.remove(edge_object)
 
+        self.gr_node.update_node_width()
         self.update_edge_positions()
 
     def get_socket_position(self, position):
@@ -64,6 +78,7 @@ class Node:
             return [0, self.gr_node.height]
 
     def update_edge_positions(self):
+        self.update_edge_indexes()
         all_connections = self.get_all_connections()
 
         if all_connections:

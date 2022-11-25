@@ -11,11 +11,14 @@ class Edge:
                  source_connection_name=None,
                  node_destination=None,
                  destination_connection_name=None,
-                 edge_type=1):
+                 edge_type=2):
         self.scene = scene
 
         self.node_start = node_start
         self.source_connection_name = source_connection_name
+
+        self.input_connection_index = 1
+        self.output_connection_index = 1
 
         self.node_destination = node_destination
         self.destination_connection_name = destination_connection_name
@@ -36,21 +39,28 @@ class Edge:
             return
 
         source_pos = None
+
+        # this one used to have a little offset in front of node so edge will not intersect with node
+        socket_padding = 3
         if self.node_start and self.node_start.output_connections:
             source_pos = self.node_start.output_socket.get_socket_position()
-            if self.node_destination or len(self.node_start.output_connections)==1:
-                source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections)+1)
-            else:
-                source_pos[0] += self.node_start.gr_node.pos().x() + self.node_start.gr_node.width / (len(self.node_start.output_connections))
-            source_pos[1] += self.node_start.gr_node.pos().y() + 3
+            amount_of_ouput_conns = len(self.node_start.output_connections)
 
+            outputs_step = self.node_start.gr_node.width / (amount_of_ouput_conns+1)
+            source_pos[0] += self.node_start.gr_node.pos().x() +  outputs_step * self.output_connection_index - outputs_step
+            source_pos[1] += self.node_start.gr_node.pos().y() + socket_padding
             self.gr_edge.set_source(*source_pos)
 
         if self.node_destination and self.node_destination.input_connections:
             end_pos = self.node_destination.input_socket.get_socket_position()
 
-            end_pos[0] += self.node_destination.gr_node.pos().x() + self.node_destination.gr_node.width / (len(self.node_destination.input_connections)+1)
-            end_pos[1] += self.node_destination.gr_node.pos().y() + self.node_start.socket_height - 3
+            amount_of_input_conns = len(self.node_destination.input_connections)
+            # if amount_of_input_conns == 1:
+            #     amount_of_input_conns += 1
+
+            inp_step = self.node_destination.gr_node.width / (amount_of_input_conns+1)
+            end_pos[0] += self.node_destination.gr_node.pos().x() + inp_step * self.input_connection_index - inp_step
+            end_pos[1] += self.node_destination.gr_node.pos().y() + self.node_start.socket_height - socket_padding
 
             self.gr_edge.set_destination(*end_pos)
         else:

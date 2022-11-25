@@ -12,6 +12,13 @@ class QDMGraphicsNode(QGraphicsItem):
         self.node = node
         self.content = self.node.content
 
+        self.width = None
+        self.title_item = None
+        self.node_type_title_item = None
+
+        self.update_ui()
+
+    def update_ui(self):
         self._node_inner_width_padding = 60
         self._node_inner_height_padding = 35
 
@@ -29,7 +36,8 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.biggest_font_width = self.title_width if self.title_width > self._node_type_width else self._node_type_width
 
-        self.width = (self.biggest_font_width + self._node_inner_width_padding) * 1.25
+        if not self.width:
+            self.width = (self.biggest_font_width + self._node_inner_width_padding) * 1.25
         self.height = (self.title_height + self._node_type_height)
 
         self.edge_size = 5.0
@@ -65,6 +73,10 @@ class QDMGraphicsNode(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsMovable)
 
     def init_title(self):
+        if self.title_item:
+            self.title_item.setParent(None)
+            del self.title_item
+
         self.title_item = QGraphicsTextItem(self)
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
@@ -72,6 +84,10 @@ class QDMGraphicsNode(QGraphicsItem):
         self.title_item.setPos(self.title_x_pos, self.title_height-3)
 
     def init_node_type_title(self):
+        if self.node_type_title_item:
+            self.node_type_title_item.setParent(None)
+            del self.node_type_title_item
+
         self.node_type_title_item = QGraphicsTextItem(self)
         self.node_type_title_item.setDefaultTextColor(self._node_type_title_color)
         self.node_type_title_item.setFont(self._node_type_title_font)
@@ -113,50 +129,6 @@ class QDMGraphicsNode(QGraphicsItem):
 
     def paint(self, painter, style, widget=None):
 
-        # title
-        # path_title = QPainterPath()
-        # path_title.setFillRule(Qt.WindingFill)
-        # path_title.addRoundedRect(
-        #     0,
-        #     0,
-        #     self.width,
-        #     self.title_height,
-        #     self.edge_size,
-        #     self.edge_size
-        # )
-        # path_title.addRect(
-        #     0,
-        #     self.title_height - self.edge_size,
-        #     self.edge_size,
-        #     self.edge_size,
-        # )
-        # path_title.addRect(
-        #     self.width - self.edge_size,
-        #     self.title_height - self.edge_size,
-        #     self.edge_size,
-        #     self.edge_size,
-        # )
-        # painter.setPen(Qt.NoPen)
-        # painter.setBrush(self._brush_title)
-        # painter.drawPath(path_title.simplified())
-
-        # # content (background)
-        # path_content = QPainterPath()
-        # path_content.setFillRule(Qt.WindingFill)
-        # path_content.addRoundedRect(
-        #     0,
-        #     self.title_height,
-        #     self.width,
-        #     self.height - self.title_height,
-        #     self.edge_size,
-        #     self.edge_size
-        # )
-        # path_content.addRect(0, self.title_height, self.edge_size, self.edge_size)
-        # path_content.addRect(self.width - self.edge_size, self.title_height, self.edge_size, self.edge_size)
-        # painter.setPen(Qt.NoPen)
-        # painter.setBrush(self._brush_background)
-        # painter.drawPath(path_content.simplified())
-
         # outline
         path_outline = QPainterPath()
         path_outline.setFillRule(Qt.WindingFill)
@@ -173,4 +145,15 @@ class QDMGraphicsNode(QGraphicsItem):
         painter.setBrush(QColor("#505050"))
         # painter.setBrush(Qt.NoBrush)
         painter.drawPath(path_outline.simplified())
+
+    def update_node_width(self):
+        len_inp_conn = len(self.node.input_connections)
+        len_out_conn = len(self.node.output_connections)
+
+        max_len_conn = max(len_inp_conn, len_out_conn)
+        step_size = self.width / max_len_conn
+        min_step_size = 50
+        if step_size < min_step_size:
+            self.width = (max_len_conn+2) * min_step_size
+            self.update_ui()
 
