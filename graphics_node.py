@@ -44,8 +44,8 @@ class QDMGraphicsNode(QGraphicsItem):
         self.title_height = 20.0
         self._padding = 3.0
 
-        # self._pen_default = QPen(QColor("#7F000000"))
-        self._pen_default = QPen(QColor("#5f777f"))
+        self.border_color = QColor("#5f777f")
+        self._pen_default = QPen(self.border_color)
         self._pen_selected = QPen(QColor("#FFFFA637"))
         self._pen_selected.setWidth(2)
 
@@ -78,6 +78,7 @@ class QDMGraphicsNode(QGraphicsItem):
             del self.title_item
 
         self.title_item = QGraphicsTextItem(self)
+        self.title_item.node = self.node
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
         self.title_x_pos = self.width / 2 - self.title_width / 2
@@ -89,6 +90,7 @@ class QDMGraphicsNode(QGraphicsItem):
             del self.node_type_title_item
 
         self.node_type_title_item = QGraphicsTextItem(self)
+        self.node_type_title_item.node = self.node
         self.node_type_title_item.setDefaultTextColor(self._node_type_title_color)
         self.node_type_title_item.setFont(self._node_type_title_font)
         x_pos = self.width / 2 - self._node_type_width / 2
@@ -107,7 +109,11 @@ class QDMGraphicsNode(QGraphicsItem):
 
     def mouseMoveEvent(self, event):
         super(QDMGraphicsNode, self).mouseMoveEvent(event)
-        self.node.update_edge_positions()
+
+        # optimise me, just update the selected nodes
+        for node in self.scene().scene.nodes:
+            if node.gr_node.isSelected():
+                node.update_edge_positions()
 
     @property
     def title(self):
@@ -156,4 +162,6 @@ class QDMGraphicsNode(QGraphicsItem):
         if step_size < min_step_size:
             self.width = (max_len_conn+2) * min_step_size
             self.update_ui()
+            self.node.input_socket.updateWidth(self.width)
 
+            self.node.output_socket.updateWidth(self.width)

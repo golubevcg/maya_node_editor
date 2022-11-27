@@ -3,6 +3,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from edge_object import Edge
+from graphics_edge import QDMGraphicsEdge
 from graphics_node import QDMGraphicsNode
 from graphics_socket import QDMGraphicsSocket
 
@@ -45,6 +46,7 @@ class QDMGraphicsView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setDragMode(QGraphicsView.RubberBandDrag)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MiddleButton:
@@ -112,6 +114,24 @@ class QDMGraphicsView(QGraphicsView):
                 self.edge_drag_start(self.click_pressed_item)
                 return
 
+        if hasattr(self.click_pressed_item, "node") or \
+                isinstance(self.click_pressed_item, QDMGraphicsEdge) or \
+                self.click_pressed_item is None:
+            if event.modifiers() & Qt.ShiftModifier:
+                event.ignore()
+                fakeEvent = QMouseEvent(
+                    QEvent.MouseButtonPress,
+                    event.localPos(),
+                    event.screenPos(),
+                    Qt.LeftButton,
+                    event.buttons() | Qt.LeftButton,
+                    event.modifiers() | Qt.ControlModifier
+                )
+                super(QDMGraphicsView, self).mousePressEvent(fakeEvent)
+                return
+
+
+
         print("isinstance(self.click_pressed_item, QDMGraphicsNode)", isinstance(self.click_pressed_item, QDMGraphicsNode))
         print(type(self.click_pressed_item))
         if isinstance(self.click_pressed_item, QDMGraphicsNode):
@@ -134,6 +154,22 @@ class QDMGraphicsView(QGraphicsView):
             if self.click_pressed_item != click_released_item:
                 result = self.edge_drag_end(click_released_item)
                 if result: return
+
+        if hasattr(self.click_pressed_item, "node") or \
+                isinstance(click_released_item, QDMGraphicsEdge) or \
+                click_released_item is None:
+            if event.modifiers() & Qt.ShiftModifier:
+                event.ignore()
+                fakeEvent = QMouseEvent(
+                    event.type(),
+                    event.localPos(),
+                    event.screenPos(),
+                    Qt.LeftButton,
+                    Qt.NoButton,
+                    event.modifiers() | Qt.ControlModifier
+                )
+                super(QDMGraphicsView, self).mouseReleaseEvent(fakeEvent)
+                return
 
         super(QDMGraphicsView, self).mouseReleaseEvent(event)
 
@@ -224,15 +260,15 @@ class QDMGraphicsView(QGraphicsView):
         return False
 
     def mouseMoveEvent(self, event):
-        pos = self.mapToScene(event.pos())
+        scene_pos = self.mapToScene(event.pos())
         if self.mode == MODE_EDGE_DRAG and self.drag_edge:
-            self.drag_edge.gr_edge.set_destination(pos.x()-1, pos.y()-1)
+            self.drag_edge.gr_edge.set_destination(scene_pos.x()-1, scene_pos.y()-1)
             self.drag_edge.gr_edge.update()
 
-        # item = self.itemAt(pos.x(), pos.y())
-        # print(type(item))
-        # if item == QDMGraphicsSocket:
-        #     print("SOCKEEEETTTT")
+        # event_pos = event.pos()
+        # item = self.itemAt(QPoint(event_pos.x(), event_pos.y()))
+        # if isinstance(item, QDMGraphicsSocket):
+
 
         super(QDMGraphicsView, self).mouseMoveEvent(event)
 

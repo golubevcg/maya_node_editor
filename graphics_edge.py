@@ -28,7 +28,12 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         self._arrow_height = 5
         self._arrow_width = 4
 
-        self.y_padding = 3
+        self.y_padding = 4
+
+        # add param to this attribute
+        # if this attribute changed - recalculate node graph
+        # on i/o hotkeys update this parent node and redraw node graph
+        self.current_parent_dag_node = None
 
     def set_source(self, x, y):
         self.pos_source = [x, y]
@@ -49,8 +54,9 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         socket_radius = 3
         painter.setPen(self._pen)
         painter.setBrush(self._color)
-        painter.drawEllipse(QPointF(self.pos_source[0], self.pos_source[1]+3), socket_radius, socket_radius)
-        painter.drawEllipse(QPointF(self.pos_destination[0], self.pos_destination[1]-3), socket_radius, socket_radius)
+
+        painter.drawEllipse(QPointF(self.pos_source[0], self.pos_source[1]+(self.y_padding-2)), socket_radius, socket_radius)
+        painter.drawEllipse(QPointF(self.pos_destination[0], self.pos_destination[1]-(self.y_padding-2)), socket_radius, socket_radius)
 
         triangle_source = self.arrowCalc(
             self.path()

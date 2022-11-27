@@ -40,3 +40,8 @@ class Socket:
 
     def __str__(self):
         return "<Socket %s..%s>" % (hex(id(self))[2:5], hex(id(self))[-3:])
+
+    def updateWidth(self, width):
+        self.width = width
+        self.gr_socket.width = width
+        self.gr_socket.update()

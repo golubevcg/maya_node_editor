@@ -47,7 +47,7 @@ class Edge:
             amount_of_ouput_conns = len(self.node_start.output_connections)
 
             outputs_step = self.node_start.gr_node.width / (amount_of_ouput_conns+1)
-            source_pos[0] += self.node_start.gr_node.pos().x() +  outputs_step * self.output_connection_index - outputs_step
+            source_pos[0] += self.node_start.gr_node.pos().x() + outputs_step * self.output_connection_index - outputs_step
             source_pos[1] += self.node_start.gr_node.pos().y() + socket_padding
             self.gr_edge.set_source(*source_pos)
 

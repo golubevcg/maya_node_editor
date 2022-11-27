@@ -17,6 +17,7 @@ class Node:
 
         # init sockets
         self.socket_height = 20
+
         self.init_input_socket()
         self.init_output_socket()
 
@@ -73,9 +74,9 @@ class Node:
             raise ValueError("Position must be on of the Possible Position constant values")
 
         if position == "TOP":
-            return [0, -self.socket_height]
+            return [0, -self.socket_height-1]
         else:
-            return [0, self.gr_node.height]
+            return [0, self.gr_node.height+1]
 
     def update_edge_positions(self):
         self.update_edge_indexes()
