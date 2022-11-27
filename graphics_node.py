@@ -22,29 +22,28 @@ class QDMGraphicsNode(QGraphicsItem):
         self._node_inner_width_padding = 60
         self._node_inner_height_padding = 35
 
-        self._title_color = Qt.white
-        self._title_font = QFont("Ubuntu", 14)
+        self._title_color = QColor("#cccccc")
+        self._title_font = QFont("Ubuntu", 12)
         qfont_metrics = QFontMetrics(self._title_font)
         self.title_width = qfont_metrics.horizontalAdvance(self.node.title)
         self.title_height = qfont_metrics.height()
 
         self._node_type_title_color = QColor("#656565")
-        self._node_type_title_font = QFont("Ubuntu", 10)
+        self._node_type_title_font = QFont("Ubuntu", 7)
         node_type_qfont_metrics = QFontMetrics(self._node_type_title_font)
         self._node_type_width = node_type_qfont_metrics.horizontalAdvance(self.node.type)
         self._node_type_height = node_type_qfont_metrics.height()
 
         self.biggest_font_width = self.title_width if self.title_width > self._node_type_width else self._node_type_width
 
-        if not self.width:
-            self.width = (self.biggest_font_width + self._node_inner_width_padding) * 1.25
-        self.height = (self.title_height + self._node_type_height)
-
-        self.edge_size = 5.0
+        self.width = 140
+        self.height = 45
+        self.edge_size = 9.0
         self.title_height = 20.0
         self._padding = 3.0
 
-        self.border_color = QColor("#5f777f")
+        # self.border_color = QColor("#5f777f")
+        self.border_color = QColor("transparent")
         self._pen_default = QPen(self.border_color)
         self._pen_selected = QPen(QColor("#FFFFA637"))
         self._pen_selected.setWidth(2)
@@ -81,8 +80,8 @@ class QDMGraphicsNode(QGraphicsItem):
         self.title_item.node = self.node
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
-        self.title_x_pos = self.width / 2 - self.title_width / 2
-        self.title_item.setPos(self.title_x_pos, self.title_height-3)
+        self.title_x_pos = self.width + 5
+        self.title_item.setPos(self.title_x_pos, self.title_height - self.title_height/2-2)
 
     def init_node_type_title(self):
         if self.node_type_title_item:
@@ -93,8 +92,8 @@ class QDMGraphicsNode(QGraphicsItem):
         self.node_type_title_item.node = self.node
         self.node_type_title_item.setDefaultTextColor(self._node_type_title_color)
         self.node_type_title_item.setFont(self._node_type_title_font)
-        x_pos = self.width / 2 - self._node_type_width / 2
-        self.node_type_title_item.setPos(x_pos, -3)
+        x_pos = self.width + 5
+        self.node_type_title_item.setPos(x_pos, -5)
 
     def init_content(self):
         self.gr_content = QGraphicsProxyWidget(self)
@@ -148,7 +147,7 @@ class QDMGraphicsNode(QGraphicsItem):
         )
 
         painter.setPen(self._pen_default if not self.isSelected() else self._pen_selected)
-        painter.setBrush(QColor("#505050"))
+        painter.setBrush(QColor("#cccccc"))
         # painter.setBrush(Qt.NoBrush)
         painter.drawPath(path_outline.simplified())
 

@@ -20,7 +20,7 @@ class QDMGraphicsSocket(QGraphicsItem):
 
         self.setAcceptHoverEvents(True)
 
-        self._hover_pen = QPen(self.gr_node.border_color)
+        self._hover_pen = QPen(QColor("#808080"))
         self._hover_pen.setWidth(1)
 
         self.hover_mode = False
@@ -52,8 +52,8 @@ class QDMGraphicsSocket(QGraphicsItem):
         return QRectF(
             0,
             0,
-            self.width,
-            self.height
+            self.width*1.4,
+            self.height*1.4
         )
 
     def hoverEnterEvent(self, event):

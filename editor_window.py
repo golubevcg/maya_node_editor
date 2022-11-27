@@ -42,10 +42,10 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         # self.addDebugContent()
 
     def add_nodes(self):
-        node = Node(self.scene, "My SuperNode", "node type")
+        node = Node(self.scene, "my_super_node", "node type")
         node.set_position(-75, -250)
 
-        node1 = Node(self.scene, "BoxShape1", "mesh")
+        node1 = Node(self.scene, "boxShape1", "mesh")
         node1.set_position(-250, -30)
 
         node2 = Node(self.scene, "joint1", "joint")

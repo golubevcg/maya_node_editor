@@ -73,10 +73,12 @@ class Node:
         if position not in POSSIBLE_POSITIONS:
             raise ValueError("Position must be on of the Possible Position constant values")
 
+        padding = 4
+
         if position == "TOP":
-            return [0, -self.socket_height-1]
+            return [0, -self.socket_height-padding]
         else:
-            return [0, self.gr_node.height+1]
+            return [0, self.gr_node.height+padding]
 
     def update_edge_positions(self):
         self.update_edge_indexes()

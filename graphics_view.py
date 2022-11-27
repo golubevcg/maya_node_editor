@@ -200,7 +200,7 @@ class QDMGraphicsView(QGraphicsView):
 
         clamped = False
         if self.zoom < self.zoom_range[0]:
-            self.zoom, clamped = self.zoom_range[0], True
+            self.zoom, clamped = self.zoom_range[0], Trued
         if self.zoom > self.zoom_range[1]:
             self.zoom, clamped = self.zoom_range[1], True
 
@@ -240,9 +240,7 @@ class QDMGraphicsView(QGraphicsView):
         # so always input socket will be to outsocket
         print("isinstance(self.click_pressed_item, QDMGraphicsSocket):", isinstance(self.click_pressed_item, QDMGraphicsSocket))
         if isinstance(self.click_pressed_item, QDMGraphicsSocket):
-            print("isinstance(item, QDMGraphicsSocket):", isinstance(item, QDMGraphicsSocket))
-            print(type(item))
-            if isinstance(item, QDMGraphicsSocket) and self.click_pressed_item.socket_obj.position != item.socket_obj.position:
+            if item and isinstance(item, QDMGraphicsSocket) and self.click_pressed_item.socket_obj.position != item.socket_obj.position:
                 print("    Assign end socket")
                 self.drag_edge.node_destination = item.socket_obj.node
                 self.drag_edge.node_destination.add_input_connection(self.drag_edge)

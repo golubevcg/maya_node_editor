@@ -11,11 +11,17 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         self._pen = None
         self.edge = edge
 
-        self._color = QColor("#5f777f")
+        self.socket_color = QColor("#b3b3b3")
+        self.socket_color_selected = QColor("#FFFFA637")
+
+        self.socket_pen = QPen(self.socket_color)
+        self.socket_pen.setWidth(2)
+
+        self._color = QColor("#5f91cb")
         self._color_selected = QColor("#FFFFA637")
 
         self._pen = QPen(self._color)
-        self._pen.setWidth(2)
+        self._pen.setWidth(1)
 
         self._pen_selected = QPen(self._color_selected)
         self._pen_selected.setWidth(2.0)
@@ -51,12 +57,14 @@ class QDMGraphicsEdge(QGraphicsPathItem):
 
         painter.drawPath(self.path())
 
-        socket_radius = 3
-        painter.setPen(self._pen)
-        painter.setBrush(self._color)
+        socket_radius = 6
+        painter.setPen(self.socket_pen)
+        painter.setBrush(self.socket_color)
 
-        painter.drawEllipse(QPointF(self.pos_source[0], self.pos_source[1]+(self.y_padding-2)), socket_radius, socket_radius)
-        painter.drawEllipse(QPointF(self.pos_destination[0], self.pos_destination[1]-(self.y_padding-2)), socket_radius, socket_radius)
+        painter.drawEllipse(QPointF(self.pos_source[0], self.pos_source[1]+(self.y_padding-1)), socket_radius, socket_radius)
+
+        if self.edge.node_destination:
+            painter.drawEllipse(QPointF(self.pos_destination[0], self.pos_destination[1]-(self.y_padding-1)), socket_radius, socket_radius)
 
         triangle_source = self.arrowCalc(
             self.path()
@@ -80,7 +88,7 @@ class QDMGraphicsEdge(QGraphicsPathItem):
 
     def arrowCalc(self, line):
         # calculates the point where the arrow should be drawn
-        arrow_size = 10
+        arrow_size = 6
         arrow_padding = 0.45
 
         end_point = line.pointAtPercent(0.0 + arrow_padding)
@@ -121,7 +129,7 @@ class QDMGraphicsEdgeBezier(QDMGraphicsEdge):
         p1 = QPointF(*self.pos_destination)
 
         # bezier_padding = 80*1.5
-        bezier_padding = 50
+        bezier_padding = 50*2
 
         path = QPainterPath()
         path.moveTo(p0)
