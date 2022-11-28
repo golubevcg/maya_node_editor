@@ -46,7 +46,7 @@ class QDMGraphicsNode(QGraphicsItem):
         self.border_color = QColor("transparent")
         self._pen_default = QPen(self.border_color)
         self._pen_selected = QPen(QColor("#FFFFA637"))
-        self._pen_selected.setWidth(2)
+        self._pen_selected.setWidth(3)
 
         self._brush_title = QBrush(QColor("#FF313131"))
         self._brush_background = QBrush(QColor("#cccccc"))

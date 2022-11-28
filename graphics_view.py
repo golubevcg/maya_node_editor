@@ -130,8 +130,6 @@ class QDMGraphicsView(QGraphicsView):
                 super(QDMGraphicsView, self).mousePressEvent(fakeEvent)
                 return
 
-
-
         print("isinstance(self.click_pressed_item, QDMGraphicsNode)", isinstance(self.click_pressed_item, QDMGraphicsNode))
         print(type(self.click_pressed_item))
         if isinstance(self.click_pressed_item, QDMGraphicsNode):
@@ -240,7 +238,16 @@ class QDMGraphicsView(QGraphicsView):
         # so always input socket will be to outsocket
         print("isinstance(self.click_pressed_item, QDMGraphicsSocket):", isinstance(self.click_pressed_item, QDMGraphicsSocket))
         if isinstance(self.click_pressed_item, QDMGraphicsSocket):
-            if item and isinstance(item, QDMGraphicsSocket) and self.click_pressed_item.socket_obj.position != item.socket_obj.position:
+            print("item:", item)
+            print('isinstance(item, QDMGraphicsSocket)', isinstance(item, QDMGraphicsSocket))
+            print('self.click_pressed_item.socket_obj.position:', self.click_pressed_item.socket_obj.position)
+            print('item.socket_obj.position:', item.socket_obj.position)
+
+            # y need to replace this item self.click_pressed_item.socket_obj.position
+            # w item at the beggining of drag edge
+
+            if item and isinstance(item, QDMGraphicsSocket) \
+                    and self.drag_edge.node_start.output_socket.position != item.socket_obj.position:
                 print("    Assign end socket")
                 self.drag_edge.node_destination = item.socket_obj.node
                 self.drag_edge.node_destination.add_input_connection(self.drag_edge)
@@ -266,7 +273,6 @@ class QDMGraphicsView(QGraphicsView):
         # event_pos = event.pos()
         # item = self.itemAt(QPoint(event_pos.x(), event_pos.y()))
         # if isinstance(item, QDMGraphicsSocket):
-
 
         super(QDMGraphicsView, self).mouseMoveEvent(event)
 
