@@ -140,6 +140,7 @@ class QDMGraphicsView(QGraphicsView):
             result = self.edge_drag_end(self.click_pressed_item)
             if result: return
 
+        print("super")
         super(QDMGraphicsView, self).mousePressEvent(event)
 
     def left_mouse_button_release(self, event):

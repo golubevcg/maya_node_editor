@@ -1,9 +1,14 @@
-from PySide2.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWidget, QGraphicsSceneMouseEvent
+from PySide2.QtWidgets import (
+    QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWidget,
+    QGraphicsSceneMouseEvent, QGraphicsPixmapItem
+)
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from graphics_socket import QDMGraphicsSocket
 from socket_object import Socket
+
+import maya.cmds as cmds
 
 
 class QDMGraphicsNode(QGraphicsItem):
@@ -36,8 +41,8 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.biggest_font_width = self.title_width if self.title_width > self._node_type_width else self._node_type_width
 
-        self.width = 140
-        self.height = 45
+        self.width = 140*1.01
+        self.height = 43
         self.edge_size = 9.0
         self.title_height = 20.0
         self._padding = 3.0
@@ -58,6 +63,32 @@ class QDMGraphicsNode(QGraphicsItem):
         self.node_type_title = self.node.type
 
         self.init_ui()
+
+        icon_name = cmds.resourceManager(nameFilter="{0}.svg".format(self.node.type))
+        if icon_name:
+            icon_name = ":/{0}".format(icon_name[0])
+        else:
+            icon_name = ":/transform.svg"
+
+        icon_pixmap = QPixmap(icon_name)
+
+        self.icon_pixmap_item = QGraphicsPixmapItem(
+            icon_pixmap,
+            parent=self
+        )
+
+        icon_scale_factor = 0.12
+        self.icon_pixmap_item.setScale(icon_scale_factor)
+
+        bound_rect = self.icon_pixmap_item.boundingRect()
+        self.icon_width = bound_rect.width()*icon_scale_factor
+        self.icon_height = bound_rect.height()*icon_scale_factor
+
+        self.icon_x_pos = self.width/2 - self.icon_width/2
+        self.icon_y_pos = self.height/2 - self.icon_height/2
+
+        self.icon_pixmap_item.setPos(self.icon_x_pos, self.icon_y_pos)
+        self.icon_pixmap_item.setTransformationMode(Qt.SmoothTransformation)
 
     def boundingRect(self):
         return QRectF(
@@ -149,8 +180,44 @@ class QDMGraphicsNode(QGraphicsItem):
 
         painter.setPen(self._pen_default if not self.isSelected() else self._pen_selected)
         painter.setBrush(QColor("#cccccc"))
-        # painter.setBrush(Qt.NoBrush)
+
         painter.drawPath(path_outline.simplified())
+
+        icon_line_padding = 15
+        icon_line_delta = 6
+        icon_line_y_padding = 5
+
+        line1_p0_x = self.icon_x_pos + self.icon_width + icon_line_padding - icon_line_delta-3
+        line1_p0_y = self.height - icon_line_y_padding
+
+        line1_p1_x = self.icon_x_pos + self.icon_width + icon_line_padding-3
+        line1_p1_y = icon_line_y_padding
+
+        lines_color = QColor("#707070")
+        lines_pen = QPen(lines_color)
+        lines_pen.setWidth(1)
+        painter.setPen(lines_pen)
+        painter.setBrush(Qt.NoBrush)
+
+        line_path = QPainterPath(QPointF(line1_p0_x, line1_p0_y))
+        line_path.lineTo(line1_p1_x, line1_p1_y)
+        painter.drawPath(line_path)
+
+        line2_p0_x = self.icon_x_pos - self.icon_width + icon_line_padding - icon_line_delta+3
+        line2_p0_y = self.height - icon_line_y_padding
+
+        line2_p1_x = self.icon_x_pos - self.icon_width + icon_line_padding+3
+        line2_p1_y = icon_line_y_padding
+
+        painter.setPen(lines_pen)
+        painter.setBrush(Qt.NoBrush)
+
+        line_path = QPainterPath(QPointF(line2_p0_x, line2_p0_y))
+        line_path.lineTo(line2_p1_x, line2_p1_y)
+        painter.drawPath(line_path)
+
+
+
 
     def update_node_width(self):
         len_inp_conn = len(self.node.input_connections)
