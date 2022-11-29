@@ -24,8 +24,10 @@ class Scene:
         self.edges.append(edge)
 
     def remove_node(self, node):
-        self.nodes.remove(node)
+        if node in self.nodes:
+            self.nodes.remove(node)
 
     def remove_edge(self, edge):
-        self.edges.remove(edge)
+        if edge in self.edges:
+            self.edges.remove(edge)
 

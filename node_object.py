@@ -97,3 +97,19 @@ class Node:
             all_connections.extend(self.output_connections)
 
         return all_connections
+
+    def remove(self):
+        # remove all edges fom sockets
+        all_connections = self.get_all_connections()
+        if all_connections:
+            for edge in all_connections:
+                edge.remove()
+
+        # remove gr_node
+        self.scene.gr_scene.removeItem(self.gr_node)
+        self.gr_node = None
+
+        # remove node from the scene
+        self.scene.remove_node(self)
+
+        # print removed

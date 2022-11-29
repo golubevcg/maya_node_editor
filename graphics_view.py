@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QGraphicsView, QLineEdit
+from PySide2.QtWidgets import QGraphicsView, QLineEdit, QGraphicsTextItem
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
@@ -131,7 +131,6 @@ class QDMGraphicsView(QGraphicsView):
                 return
 
         print("isinstance(self.click_pressed_item, QDMGraphicsNode)", isinstance(self.click_pressed_item, QDMGraphicsNode))
-        print(type(self.click_pressed_item))
         if isinstance(self.click_pressed_item, QDMGraphicsNode):
             print("inp conn length:", len(self.click_pressed_item.node.input_connections))
             print("out conn length:", len(self.click_pressed_item.node.output_connections))
@@ -198,7 +197,7 @@ class QDMGraphicsView(QGraphicsView):
 
         clamped = False
         if self.zoom < self.zoom_range[0]:
-            self.zoom, clamped = self.zoom_range[0], Trued
+            self.zoom, clamped = self.zoom_range[0], True
         if self.zoom > self.zoom_range[1]:
             self.zoom, clamped = self.zoom_range[1], True
 
@@ -240,8 +239,6 @@ class QDMGraphicsView(QGraphicsView):
         if isinstance(self.click_pressed_item, QDMGraphicsSocket):
             print("item:", item)
             print('isinstance(item, QDMGraphicsSocket)', isinstance(item, QDMGraphicsSocket))
-            print('self.click_pressed_item.socket_obj.position:', self.click_pressed_item.socket_obj.position)
-            print('item.socket_obj.position:', item.socket_obj.position)
 
             # y need to replace this item self.click_pressed_item.socket_obj.position
             # w item at the beggining of drag edge
@@ -280,6 +277,22 @@ class QDMGraphicsView(QGraphicsView):
         key = event.key()
         if key == Qt.Key_Tab:
             self.reveal_tab_search()
+
+        elif key == Qt.Key_Delete:
+            self.delete_selected()
+        else:
+            super(QDMGraphicsView, self).keyPressEvent(event)
+
+    def delete_selected(self):
+        selection = self.gr_scene.selectedItems()
+        if not selection:
+            return
+
+        for item in selection:
+            if isinstance(item, QDMGraphicsEdge):
+                item.edge.remove()
+            elif hasattr(item, "node"):
+                item.node.remove()
 
     def reveal_tab_search(self):
         ql_edit = QLineEdit("tralala")

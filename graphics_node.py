@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWidget
+from PySide2.QtWidgets import QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWidget, QGraphicsSceneMouseEvent
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
@@ -76,12 +76,13 @@ class QDMGraphicsNode(QGraphicsItem):
             self.title_item.setParent(None)
             del self.title_item
 
-        self.title_item = QGraphicsTextItem(self)
+        self.title_item = QDMGraphicsTextItem(self)
         self.title_item.node = self.node
         self.title_item.setDefaultTextColor(self._title_color)
         self.title_item.setFont(self._title_font)
         self.title_x_pos = self.width + 5
         self.title_item.setPos(self.title_x_pos, self.title_height - self.title_height/2-2)
+        self.title_item.setTextInteractionFlags(Qt.TextEditorInteraction)
 
     def init_node_type_title(self):
         if self.node_type_title_item:
@@ -156,6 +157,9 @@ class QDMGraphicsNode(QGraphicsItem):
         len_out_conn = len(self.node.output_connections)
 
         max_len_conn = max(len_inp_conn, len_out_conn)
+        if not max_len_conn:
+            return
+
         step_size = self.width / max_len_conn
         min_step_size = 50
         if step_size < min_step_size:
@@ -164,3 +168,15 @@ class QDMGraphicsNode(QGraphicsItem):
             self.node.input_socket.updateWidth(self.width)
 
             self.node.output_socket.updateWidth(self.width)
+
+
+class QDMGraphicsTextItem(QGraphicsTextItem):
+    def __init__(self, node):
+        self.node = node
+        super(QDMGraphicsTextItem, self).__init__(node)
+
+    def focusOutEvent(self, event):
+        super(QDMGraphicsTextItem, self).focusOutEvent(event)
+        text = self.document().toPlainText()
+        if self.node.title != text:
+            self.node.title = text
