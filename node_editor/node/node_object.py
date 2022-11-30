@@ -1,6 +1,6 @@
 from content_widget import QDMNodeContentWidget
 from graphics_node import QDMGraphicsNode
-from socket_object import POSSIBLE_POSITIONS, Socket
+from node_editor.socket.socket_object import POSSIBLE_POSITIONS, Socket
 
 
 class Node:

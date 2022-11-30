@@ -1,7 +1,5 @@
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QPen, QBrush
-
 from graphics_socket import QDMGraphicsSocket
+
 
 POSSIBLE_POSITIONS = {
     "TOP",

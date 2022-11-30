@@ -3,10 +3,10 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
-from edge_object import Edge
-from node_object import Node
-from scene_object import Scene
-from graphics_view import QDMGraphicsView
+from node_editor.edge.edge_object import Edge
+from node_editor.node.node_object import Node
+from node_editor.scene.scene_object import Scene
+from node_editor.view.graphics_view import QDMGraphicsView
 
 
 class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):

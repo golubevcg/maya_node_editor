@@ -1,11 +1,11 @@
-from PySide2.QtWidgets import QGraphicsView, QLineEdit, QGraphicsTextItem
+from PySide2.QtWidgets import QGraphicsView, QLineEdit
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
-from edge_object import Edge
-from graphics_edge import QDMGraphicsEdge
-from graphics_node import QDMGraphicsNode
-from graphics_socket import QDMGraphicsSocket
+from node_editor.edge.edge_object import Edge
+from node_editor.edge.graphics_edge import QDMGraphicsEdge
+from node_editor.node.graphics_node import QDMGraphicsNode
+from node_editor.socket.graphics_socket import QDMGraphicsSocket
 
 MODE_NOOP = 1
 MODE_EDGE_DRAG = 2

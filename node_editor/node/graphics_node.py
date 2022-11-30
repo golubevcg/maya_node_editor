@@ -1,12 +1,9 @@
 from PySide2.QtWidgets import (
     QGraphicsItem, QGraphicsTextItem, QGraphicsProxyWidget,
-    QGraphicsSceneMouseEvent, QGraphicsPixmapItem
+    QGraphicsPixmapItem
 )
 from PySide2.QtCore import *
 from PySide2.QtGui import *
-
-from graphics_socket import QDMGraphicsSocket
-from socket_object import Socket
 
 import maya.cmds as cmds
 
@@ -64,10 +61,13 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.init_ui()
 
-        icon_name = cmds.resourceManager(nameFilter="{0}.svg".format(self.node.type))
+        icon_name = cmds.resourceManager(nameFilter="{0}.*".format(self.node.type))
         if icon_name:
-            icon_name = ":/{0}".format(icon_name[0])
-        else:
+            icon_name = [name for name in icon_name if name.count(".") == 1]
+            if icon_name:
+                icon_name = ":/{0}".format(icon_name[0])
+
+        if not icon_name:
             icon_name = ":/transform.svg"
 
         icon_pixmap = QPixmap(icon_name)
