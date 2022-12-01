@@ -7,6 +7,8 @@ from node_editor.edge.graphics_edge import QDMGraphicsEdge
 from node_editor.node.graphics_node import QDMGraphicsNode
 from node_editor.socket.graphics_socket import QDMGraphicsSocket
 
+import maya.cmds as cmds
+
 MODE_NOOP = 1
 MODE_EDGE_DRAG = 2
 
@@ -268,24 +270,37 @@ class QDMGraphicsView(QGraphicsView):
             self.drag_edge.gr_edge.set_destination(scene_pos.x()-1, scene_pos.y()-1)
             self.drag_edge.gr_edge.update()
 
-        # event_pos = event.pos()
-        # item = self.itemAt(QPoint(event_pos.x(), event_pos.y()))
-        # if isinstance(item, QDMGraphicsSocket):
-
         super(QDMGraphicsView, self).mouseMoveEvent(event)
 
     def keyPressEvent(self, event):
+        selection = self.gr_scene.selectedItems()
         key = event.key()
         if key == Qt.Key_Tab:
             self.reveal_tab_search()
-
         elif key == Qt.Key_Delete:
-            self.delete_selected()
-        else:
-            super(QDMGraphicsView, self).keyPressEvent(event)
+            self.delete_items(selection)
 
-    def delete_selected(self):
-        selection = self.gr_scene.selectedItems()
+        if len(selection) != 1:
+            return
+
+        selected_item = selection[0]
+        if not isinstance(selection[0], QDMGraphicsNode):
+            return
+
+        node_full_name = selected_item.node.path
+        if key == Qt.Key_I:
+            self.step_inside_dag_node(node_full_name)
+        elif key == Qt.Key_O:
+            self.step_outside_dag_node(node_full_name)
+
+    def step_inside_dag_node(self, dag_node):
+        self.gr_scene.scene.main_window.get_maya_scene_top_nodes(dag_node)
+
+    def step_outside_dag_node(self, dag_node):
+        parent = cmds.listRelatives(dag_node, parent=True)
+        self.gr_scene.scene.main_window.get_maya_scene_top_nodes(parent)
+
+    def delete_items(self, selection):
         if not selection:
             return
 

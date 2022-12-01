@@ -216,9 +216,6 @@ class QDMGraphicsNode(QGraphicsItem):
         line_path.lineTo(line2_p1_x, line2_p1_y)
         painter.drawPath(line_path)
 
-
-
-
     def update_node_width(self):
         len_inp_conn = len(self.node.input_connections)
         len_out_conn = len(self.node.output_connections)

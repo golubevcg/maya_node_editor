@@ -9,6 +9,8 @@ class Node:
         self.title = title
         self.type = type
 
+        self.path = None
+
         self.content = QDMNodeContentWidget()
         self.gr_node = QDMGraphicsNode(self)
 
