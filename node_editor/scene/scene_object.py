@@ -4,6 +4,7 @@ from PySide2.QtGui import *
 
 class Scene:
     def __init__(self, main_window):
+        print("------////SCENE_OBJ_INIT////-------")
         self.nodes = []
         self.edges = []
 
@@ -34,11 +35,6 @@ class Scene:
             self.edges.remove(edge)
 
     def clear_scene(self):
+        print("clear_scene:", self)
         items = self.gr_scene.items()
         self.main_window.view.delete_items(items)
-        for node in self.nodes:
-            node.remove()
-
-        for edge in self.edges:
-            edge.remove()
-

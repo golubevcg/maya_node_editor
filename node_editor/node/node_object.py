@@ -113,5 +113,4 @@ class Node:
 
         # remove node from the scene
         self.scene.remove_node(self)
-
-        # print removed
+        print("removed", self.title)

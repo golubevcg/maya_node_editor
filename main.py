@@ -18,5 +18,3 @@ if __name__ == "__main__":
     from editor_window import NodeEditorWindow
 
     wnd = NodeEditorWindow()
-
-    wnd.init_ui()

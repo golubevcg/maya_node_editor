@@ -34,6 +34,8 @@ class QDMGraphicsView(QGraphicsView):
         self.zoom_range = [0, 10]
         self.EDGE_TYPE_GLOBAL = 2
 
+        self.current_root = None
+
     def init_ui(self):
         self.setRenderHints(
             QPainter.Antialiasing |
@@ -280,6 +282,15 @@ class QDMGraphicsView(QGraphicsView):
         elif key == Qt.Key_Delete:
             self.delete_items(selection)
 
+        print("self.current_root:", self.current_root)
+        print(key == Qt.Key_O and self.current_root)
+        if key == Qt.Key_O and self.current_root:
+            parent = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
+            self.step_outside_dag_node(parent)
+            if parent:
+                grand_parent = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
+                self.current_root = grand_parent
+
         if len(selection) != 1:
             return
 
@@ -290,15 +301,14 @@ class QDMGraphicsView(QGraphicsView):
         node_full_name = selected_item.node.path
         if key == Qt.Key_I:
             self.step_inside_dag_node(node_full_name)
-        elif key == Qt.Key_O:
-            self.step_outside_dag_node(node_full_name)
 
     def step_inside_dag_node(self, dag_node):
-        self.gr_scene.scene.main_window.get_maya_scene_top_nodes(dag_node)
+        self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(dag_node)
+        self.current_root = dag_node
 
     def step_outside_dag_node(self, dag_node):
         parent = cmds.listRelatives(dag_node, parent=True)
-        self.gr_scene.scene.main_window.get_maya_scene_top_nodes(parent)
+        self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(parent)
 
     def delete_items(self, selection):
         if not selection:
@@ -307,7 +317,7 @@ class QDMGraphicsView(QGraphicsView):
         for item in selection:
             if isinstance(item, QDMGraphicsEdge):
                 item.edge.remove()
-            elif hasattr(item, "node"):
+            elif isinstance(item, QDMGraphicsNode):
                 item.node.remove()
 
     def reveal_tab_search(self):
