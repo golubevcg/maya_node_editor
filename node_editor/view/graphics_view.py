@@ -282,14 +282,10 @@ class QDMGraphicsView(QGraphicsView):
         elif key == Qt.Key_Delete:
             self.delete_items(selection)
 
-        print("self.current_root:", self.current_root)
-        print(key == Qt.Key_O and self.current_root)
         if key == Qt.Key_O and self.current_root:
             parent = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
-            self.step_outside_dag_node(parent)
-            if parent:
-                grand_parent = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
-                self.current_root = grand_parent
+            self.updat_node_view_with_new_root(parent)
+            self.current_root = parent
 
         if len(selection) != 1:
             return
@@ -300,15 +296,11 @@ class QDMGraphicsView(QGraphicsView):
 
         node_full_name = selected_item.node.path
         if key == Qt.Key_I:
-            self.step_inside_dag_node(node_full_name)
+            self.updat_node_view_with_new_root(node_full_name)
 
-    def step_inside_dag_node(self, dag_node):
+    def updat_node_view_with_new_root(self, dag_node):
         self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(dag_node)
         self.current_root = dag_node
-
-    def step_outside_dag_node(self, dag_node):
-        parent = cmds.listRelatives(dag_node, parent=True)
-        self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(parent)
 
     def delete_items(self, selection):
         if not selection:

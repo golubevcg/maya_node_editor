@@ -61,7 +61,6 @@ class Node:
                 index += 2
                 edge_obj.output_connection_index = index
 
-    # TODO: WRITE REMOVE CONNECTION
     def remove_connection(self, edge_object):
         if edge_object in self.input_connections:
             self.input_connections.remove(edge_object)
@@ -113,4 +112,3 @@ class Node:
 
         # remove node from the scene
         self.scene.remove_node(self)
-        print("removed", self.title)

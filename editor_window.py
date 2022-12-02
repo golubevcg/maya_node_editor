@@ -59,39 +59,31 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
-
-        print("root_node:", root_node)
-        print("self.scene:", self.scene)
-        print("self.scene.nodes():", self.scene.nodes)
         self.scene.clear_scene()
-        print("self.scene.nodes():", self.scene.nodes)
 
         if root_node:
             top_nodes = cmds.listRelatives(root_node, children=True, fullPath=True)
         else:
             top_nodes = cmds.ls(assemblies=True, long=True)
 
-        print("top_nodes:", top_nodes)
         top_nodes = [node for node in top_nodes if node not in default_nodes]
         if not top_nodes:
             raise RuntimeError("No top nodes has been found")
 
-        init_x = -150
+        init_x = -350
         init_y = -100
 
         for index, node in enumerate(top_nodes):
-            y_pos = init_y + index * 100
+            x_pos = init_x + index * 300
+            y_pos = init_y + index * 150
 
             node_type = cmds.nodeType(node)
-            node_name = node.split("|", 1)[1]
-            print("-----node_name", node_name)
+            node_name = node.rsplit("|", 1)[1]
 
             node_obj = Node(self.scene, node_name, node_type)
             node_obj.path = node
-            node_obj.set_position(init_x, y_pos)
+            node_obj.set_position(x_pos, y_pos)
 
-        print("self.scene.nodes():", self.scene.nodes)
-        print("self.scene.gr_scene.items():", self.scene.gr_scene.items())
         self.scene.gr_scene.update()
         self.view.update()
 

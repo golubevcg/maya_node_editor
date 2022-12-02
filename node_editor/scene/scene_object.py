@@ -35,6 +35,5 @@ class Scene:
             self.edges.remove(edge)
 
     def clear_scene(self):
-        print("clear_scene:", self)
         items = self.gr_scene.items()
         self.main_window.view.delete_items(items)
