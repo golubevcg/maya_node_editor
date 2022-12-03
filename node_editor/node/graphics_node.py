@@ -17,6 +17,7 @@ class QDMGraphicsNode(QGraphicsItem):
         self.width = None
         self.title_item = None
         self.node_type_title_item = None
+        self.icon_pixmap_item = None
 
         self.update_ui()
 
@@ -38,7 +39,9 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.biggest_font_width = self.title_width if self.title_width > self._node_type_width else self._node_type_width
 
-        self.width = 140*1.01
+        if not self.width:
+            self.width = 140*1.01
+
         self.height = 43
         self.edge_size = 9.0
         self.title_height = 20.0
@@ -61,34 +64,35 @@ class QDMGraphicsNode(QGraphicsItem):
 
         self.init_ui()
 
-        icon_name = cmds.resourceManager(nameFilter="{0}.*".format(self.node.type))
-        if icon_name:
-            icon_name = [name for name in icon_name if name.count(".") == 1]
+        if not self.icon_pixmap_item:
+            icon_name = cmds.resourceManager(nameFilter="{0}.*".format(self.node.type))
             if icon_name:
-                icon_name = ":/{0}".format(icon_name[0])
+                icon_name = [name for name in icon_name if name.count(".") == 1]
+                if icon_name:
+                    icon_name = ":/{0}".format(icon_name[0])
 
-        if not icon_name:
-            icon_name = ":/transform.svg"
+            if not icon_name:
+                icon_name = ":/transform.svg"
 
-        icon_pixmap = QPixmap(icon_name)
+            icon_pixmap = QPixmap(icon_name)
 
-        self.icon_pixmap_item = QGraphicsPixmapItem(
-            icon_pixmap,
-            parent=self
-        )
+            self.icon_pixmap_item = QGraphicsPixmapItem(
+                icon_pixmap,
+                parent=self
+            )
 
-        icon_scale_factor = 0.12
-        self.icon_pixmap_item.setScale(icon_scale_factor)
+            icon_scale_factor = 0.12
+            self.icon_pixmap_item.setScale(icon_scale_factor)
 
-        bound_rect = self.icon_pixmap_item.boundingRect()
-        self.icon_width = bound_rect.width()*icon_scale_factor
-        self.icon_height = bound_rect.height()*icon_scale_factor
+            bound_rect = self.icon_pixmap_item.boundingRect()
+            self.icon_width = bound_rect.width()*icon_scale_factor
+            self.icon_height = bound_rect.height()*icon_scale_factor
+            self.icon_pixmap_item.setTransformationMode(Qt.SmoothTransformation)
 
         self.icon_x_pos = self.width/2 - self.icon_width/2
         self.icon_y_pos = self.height/2 - self.icon_height/2
 
         self.icon_pixmap_item.setPos(self.icon_x_pos, self.icon_y_pos)
-        self.icon_pixmap_item.setTransformationMode(Qt.SmoothTransformation)
 
     def boundingRect(self):
         return QRectF(
@@ -220,18 +224,18 @@ class QDMGraphicsNode(QGraphicsItem):
         len_inp_conn = len(self.node.input_connections)
         len_out_conn = len(self.node.output_connections)
 
-        max_len_conn = max(len_inp_conn, len_out_conn)
-        if not max_len_conn:
-            return
-
-        step_size = self.width / max_len_conn
-        min_step_size = 50
-        if step_size < min_step_size:
-            self.width = (max_len_conn+2) * min_step_size
-            self.update_ui()
-            self.node.input_socket.updateWidth(self.width)
-
-            self.node.output_socket.updateWidth(self.width)
+        # max_len_conn = max(len_inp_conn, len_out_conn)
+        # if not max_len_conn:
+        #     return
+        #
+        # step_size = self.width / max_len_conn
+        # min_step_size = 25*0.5
+        # if step_size < min_step_size:
+        #     self.width = (max_len_conn+2) * min_step_size
+        #
+        #     self.update_ui()
+        #     self.node.input_socket.updateWidth(self.width)
+        #     self.node.output_socket.updateWidth(self.width)
 
 
 class QDMGraphicsTextItem(QGraphicsTextItem):

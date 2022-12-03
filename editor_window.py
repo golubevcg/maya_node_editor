@@ -59,33 +59,114 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
-        self.scene.clear_scene()
 
         if root_node:
             top_nodes = cmds.listRelatives(root_node, children=True, fullPath=True)
         else:
             top_nodes = cmds.ls(assemblies=True, long=True)
 
-        top_nodes = [node for node in top_nodes if node not in default_nodes]
+        if top_nodes:
+            top_nodes = [node for node in top_nodes if node not in default_nodes]
+
         if not top_nodes:
-            raise RuntimeError("No top nodes has been found")
+            return
+
+        self.scene.clear_scene()
 
         init_x = -350
         init_y = -100
 
+        x_offset = 0
+
+        max_x = 0
+
         for index, node in enumerate(top_nodes):
-            x_pos = init_x + index * 300
-            y_pos = init_y + index * 150
+            index += 1
+            x_pos = (init_x + index * 300) + x_offset
+            y_pos = init_y + index * 100
 
             node_type = cmds.nodeType(node)
             node_name = node.rsplit("|", 1)[1]
 
             node_obj = Node(self.scene, node_name, node_type)
             node_obj.path = node
-            node_obj.set_position(x_pos, y_pos)
+
+            output_connections = cmds.listConnections(node_name, source=True, destination=False)
+            input_connections = cmds.listConnections(node_name, source=False, destination=True)
+
+            all_connections = []
+            if output_connections:
+                all_connections.extend(output_connections)
+            if input_connections:
+                all_connections.extend(input_connections)
+
+            self.connection_x_step = 180
+            node_obj.set_position(
+                x_pos + (self.connection_x_step * len(all_connections))/2,
+                y_pos
+            )
+
+            created_nodes = []
+
+            if output_connections:
+                output_nodes = self.add_connected_nodes(output_connections, node_obj)
+                created_nodes.extend(output_nodes)
+
+            if input_connections:
+                input_nodes = self.add_connected_nodes(input_connections, node_obj, output=True)
+                created_nodes.extend(input_nodes)
+
+            nodes_x_pos = [node.gr_node.pos().x() for node in created_nodes]
+
+            if nodes_x_pos:
+                max_x = max(nodes_x_pos)
+
+            x_offset += max_x
 
         self.scene.gr_scene.update()
         self.view.update()
+
+    def add_connected_nodes(self, nodes_list, node_obj, output=False):
+        pos = node_obj.gr_node.pos()
+
+        x_pos = pos.x()
+        y_pos = pos.y() + 100
+
+        x_offset = 0
+
+        if len(nodes_list) > 1:
+            x_offset = len(nodes_list)/2 * self.connection_x_step
+
+        print()
+        print("prev node x pos:", x_pos)
+        print("len(nodes_list):", len(nodes_list) )
+        print("x_offset:", x_offset)
+        created_nodes = []
+
+        for index, node_name in enumerate(nodes_list):
+            if node_name in default_nodes:
+                continue
+
+            node_type = cmds.nodeType(node_name)
+
+            upd_y_pos = y_pos + (index+1) * 130
+            if not output:
+                upd_y_pos *= -1
+
+            upd_x_pos = x_pos + index * self.connection_x_step - x_offset
+            print("upd_x_pos:", upd_x_pos)
+
+            created_node_obj = Node(self.scene, node_name, node_type)
+            created_node_obj.path = node_name
+            created_node_obj.set_position(upd_x_pos, upd_y_pos)
+            created_nodes.append(created_node_obj)
+
+            if output:
+                edge_obj = Edge(self.scene, node_obj, "input_1", created_node_obj, "output_1")
+            else:
+                edge_obj = Edge(self.scene, created_node_obj, "input_1", node_obj, "output_1")
+
+        return created_nodes
 
     def init_navigation_bar(self):
         self.navigation_bar.setContentsMargins(0, 0, 0, 0)

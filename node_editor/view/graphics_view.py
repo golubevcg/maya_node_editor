@@ -14,6 +14,8 @@ MODE_EDGE_DRAG = 2
 
 EDGE_DRAG_START_THRESHOLD = 10
 
+EDGE_TYPE_GLOBAL = 2
+
 
 class QDMGraphicsView(QGraphicsView):
     def __init__(self, gr_scene, parent=None):
@@ -27,12 +29,11 @@ class QDMGraphicsView(QGraphicsView):
 
         self.mode = MODE_NOOP
 
-        self.zoom_in_factor = 1.25
+        self.zoom_in_factor = 1.1
         self.zoom_clamp = True
         self.zoom = 5
         self.zoom_step = 1
         self.zoom_range = [0, 10]
-        self.EDGE_TYPE_GLOBAL = 2
 
         self.current_root = None
 
@@ -230,7 +231,7 @@ class QDMGraphicsView(QGraphicsView):
         self.drag_edge = Edge(
             self.gr_scene.scene,
             item.socket_obj.node,
-            edge_type=self.EDGE_TYPE_GLOBAL
+            edge_type=EDGE_TYPE_GLOBAL
         )
 
     def edge_drag_end(self, item):

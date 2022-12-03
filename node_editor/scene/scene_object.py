@@ -4,14 +4,13 @@ from PySide2.QtGui import *
 
 class Scene:
     def __init__(self, main_window):
-        print("------////SCENE_OBJ_INIT////-------")
         self.nodes = []
         self.edges = []
 
         self.main_window = main_window
 
-        self.scene_width = 64000
-        self.scene_height = 64000
+        self.scene_width = 150000
+        self.scene_height = 150000
 
         self.init_ui()
 
