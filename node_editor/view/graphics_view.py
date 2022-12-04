@@ -33,7 +33,7 @@ class QDMGraphicsView(QGraphicsView):
         self.zoom_clamp = True
         self.zoom = 5
         self.zoom_step = 1
-        self.zoom_range = [0, 10]
+        self.zoom_range = [0, 100]
 
         self.current_root = None
 
@@ -135,17 +135,11 @@ class QDMGraphicsView(QGraphicsView):
                 super(QDMGraphicsView, self).mousePressEvent(fakeEvent)
                 return
 
-        print("isinstance(self.click_pressed_item, QDMGraphicsNode)", isinstance(self.click_pressed_item, QDMGraphicsNode))
-        if isinstance(self.click_pressed_item, QDMGraphicsNode):
-            print("inp conn length:", len(self.click_pressed_item.node.input_connections))
-            print("out conn length:", len(self.click_pressed_item.node.output_connections))
-
         if self.mode == MODE_EDGE_DRAG:
             # IT IS WRONG THIS CHECK IS WRONG
             result = self.edge_drag_end(self.click_pressed_item)
             if result: return
 
-        print("super")
         super(QDMGraphicsView, self).mousePressEvent(event)
 
     def left_mouse_button_release(self, event):
@@ -179,10 +173,6 @@ class QDMGraphicsView(QGraphicsView):
     def right_mouse_button_press(self, event):
         super(QDMGraphicsView, self).mousePressEvent(event)
 
-        item = self.get_item_at_click(event)
-
-        print("RMB: DEBUG", item)
-
     def right_mouse_button_release(self, event):
         super(QDMGraphicsView, self).mouseReleaseEvent(event)
 
@@ -194,7 +184,7 @@ class QDMGraphicsView(QGraphicsView):
         old_pos = self.mapToScene(event.pos())
 
         # calc zoom
-        if event.angleDelta().y()>0:
+        if event.angleDelta().y() > 0:
             zoom_factor = self.zoom_in_factor
             self.zoom += self.zoom_step
         else:
@@ -202,8 +192,8 @@ class QDMGraphicsView(QGraphicsView):
             self.zoom -= self.zoom_step
 
         clamped = False
-        if self.zoom < self.zoom_range[0]:
-            self.zoom, clamped = self.zoom_range[0], True
+        # if self.zoom < self.zoom_range[0]:
+        #     self.zoom, clamped = self.zoom_range[0], True
         if self.zoom > self.zoom_range[1]:
             self.zoom, clamped = self.zoom_range[1], True
 
@@ -241,7 +231,10 @@ class QDMGraphicsView(QGraphicsView):
 
         # HERE YOU NEED TO DOUBLE CHECK THAT SOCKET TYPE
         # so always input socket will be to outsocket
-        print("isinstance(self.click_pressed_item, QDMGraphicsSocket):", isinstance(self.click_pressed_item, QDMGraphicsSocket))
+        print(
+            "isinstance(self.click_pressed_item, QDMGraphicsSocket):",
+            isinstance(self.click_pressed_item, QDMGraphicsSocket)
+        )
         if isinstance(self.click_pressed_item, QDMGraphicsSocket):
             print("item:", item)
             print('isinstance(item, QDMGraphicsSocket)', isinstance(item, QDMGraphicsSocket))
@@ -284,8 +277,12 @@ class QDMGraphicsView(QGraphicsView):
             self.delete_items(selection)
 
         if key == Qt.Key_O and self.current_root:
-            parent = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
-            self.updat_node_view_with_new_root(parent)
+            parent_list = cmds.listRelatives(self.current_root, parent=True, fullPath=True)
+            if parent_list:
+                parent = parent_list[0]
+            else:
+                parent = None
+            self.updat_node_view_with_new_root(dag_node=parent)
             self.current_root = parent
 
         if len(selection) != 1:
@@ -297,9 +294,9 @@ class QDMGraphicsView(QGraphicsView):
 
         node_full_name = selected_item.node.path
         if key == Qt.Key_I:
-            self.updat_node_view_with_new_root(node_full_name)
+            self.updat_node_view_with_new_root(dag_node=node_full_name)
 
-    def updat_node_view_with_new_root(self, dag_node):
+    def updat_node_view_with_new_root(self, dag_node=None):
         self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(dag_node)
         self.current_root = dag_node
 

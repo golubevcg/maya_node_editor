@@ -31,7 +31,6 @@ default_nodes = [
 class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
     def __init__(self, *args, **kwargs):
         super(NodeEditorWindow, self).__init__(*args, **kwargs)
-
         self.init_ui()
 
     def init_ui(self):
@@ -46,12 +45,14 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.scene = Scene(self)
         self.view = QDMGraphicsView(self.scene.gr_scene, self)
 
+        self.root_node = None
+        self.navigation_buttons = []
+        self.navigation_bar = QHBoxLayout()
+        self.navigation_bar.setContentsMargins(0, 0, 0, 0)
+
         self.draw_node_dependencies_for_current_root()
 
-        self.navigation_bar = QHBoxLayout()
-        self.init_navigation_bar()
         self.layout.addLayout(self.navigation_bar)
-
         self.layout.addWidget(self.view)
 
         # create graphic view
@@ -59,9 +60,12 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
-
+        print()
+        print("draw_node_dependencies_for_current_root")
+        print("root_node:", root_node)
         if root_node:
             top_nodes = cmds.listRelatives(root_node, children=True, fullPath=True)
+            self.root_node = root_node
         else:
             top_nodes = cmds.ls(assemblies=True, long=True)
 
@@ -75,9 +79,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         init_x = -350
         init_y = -100
-
         x_offset = 0
-
         max_x = 0
 
         for index, node in enumerate(top_nodes):
@@ -91,8 +93,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             node_obj = Node(self.scene, node_name, node_type)
             node_obj.path = node
 
-            output_connections = cmds.listConnections(node_name, source=True, destination=False)
-            input_connections = cmds.listConnections(node_name, source=False, destination=True)
+            output_connections = cmds.listConnections(node, source=True, destination=False)
+            input_connections = cmds.listConnections(node, source=False, destination=True)
 
             all_connections = []
             if output_connections:
@@ -123,6 +125,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
             x_offset += max_x
 
+        self.update_navigation_bar()
+
         self.scene.gr_scene.update()
         self.view.update()
 
@@ -137,10 +141,6 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         if len(nodes_list) > 1:
             x_offset = len(nodes_list)/2 * self.connection_x_step
 
-        print()
-        print("prev node x pos:", x_pos)
-        print("len(nodes_list):", len(nodes_list) )
-        print("x_offset:", x_offset)
         created_nodes = []
 
         for index, node_name in enumerate(nodes_list):
@@ -154,7 +154,6 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
                 upd_y_pos *= -1
 
             upd_x_pos = x_pos + index * self.connection_x_step - x_offset
-            print("upd_x_pos:", upd_x_pos)
 
             created_node_obj = Node(self.scene, node_name, node_type)
             created_node_obj.path = node_name
@@ -162,16 +161,50 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             created_nodes.append(created_node_obj)
 
             if output:
-                edge_obj = Edge(self.scene, node_obj, "input_1", created_node_obj, "output_1")
+                Edge(
+                    self.scene,
+                    node_obj,
+                    "input_1",
+                    created_node_obj,
+                    "output_1"
+                )
             else:
-                edge_obj = Edge(self.scene, created_node_obj, "input_1", node_obj, "output_1")
+                Edge(
+                    self.scene,
+                    created_node_obj,
+                    "input_1",
+                    node_obj,
+                    "output_1"
+                )
 
         return created_nodes
 
-    def init_navigation_bar(self):
-        self.navigation_bar.setContentsMargins(0, 0, 0, 0)
-        button1 = QPushButton("test_button1")
-        button2 = QPushButton("test_button2")
-        self.navigation_bar.addWidget(button1)
-        self.navigation_bar.addWidget(button2)
+    def update_navigation_bar(self):
+        if self.navigation_buttons:
+            for button in self.navigation_buttons:
+                self.navigation_bar.removeWidget(button)
+                del button
+
+        self.navigation_buttons = []
+        parents = []
+        if self.root_node:
+            if self.root_node.count("|") > 1:
+                parents = self.root_node.split("|")
+                parents = [node for node in parents if node]
+            elif "|" in self.root_node:
+                parents = [self.root_node]
+
+        parents = ["root"] + list(parents)
+        for node in parents:
+            full_node_path = None
+            if self.root_node and node != "root":
+                full_node_path = self.root_node.split(node)[0]
+                full_node_path = full_node_path + node
+            print("full_node_path", full_node_path)
+            button1 = QPushButton(node)
+            button1.clicked.connect(
+                lambda: self.draw_node_dependencies_for_current_root(root_node=full_node_path)
+            )
+            self.navigation_buttons.append(button1)
+            self.navigation_bar.addWidget(button1)
 
