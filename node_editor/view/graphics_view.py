@@ -108,6 +108,8 @@ class QDMGraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.NoDrag)
 
     def left_mouse_button_press(self, event):
+        self.setDragMode(QGraphicsView.RubberBandDrag)
+
         # get item which we clicked on
         self.click_pressed_item = self.get_item_at_click(event)
 
@@ -150,7 +152,9 @@ class QDMGraphicsView(QGraphicsView):
             # checking that we are not trying to connect same sockets together
             if self.click_pressed_item != click_released_item:
                 result = self.edge_drag_end(click_released_item)
-                if result: return
+                if result:
+                    super(QDMGraphicsView, self).mouseReleaseEvent(event)
+                    return
 
         if hasattr(self.click_pressed_item, "node") or \
                 isinstance(click_released_item, QDMGraphicsEdge) or \

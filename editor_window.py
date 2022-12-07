@@ -1,4 +1,4 @@
-import time
+from functools import partial
 
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
@@ -77,15 +77,12 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
-        print()
-        print("draw_node_dependencies_for_current_root")
-        print("root_node:", root_node)
         if root_node:
             top_nodes = cmds.listRelatives(root_node, children=True, fullPath=True)
-            self.root_node = root_node
         else:
             top_nodes = cmds.ls(assemblies=True, long=True)
 
+        self.root_node = root_node
         if top_nodes:
             top_nodes = [node for node in top_nodes if node not in default_nodes]
 
@@ -207,7 +204,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.inner_nav_bar_wdget.repaint()
         self.navigation_buttons = []
         parents = []
-        print("in update_navigation_bar self.root_node:", self.root_node)
+
         if self.root_node:
             if self.root_node.count("|") > 1:
                 parents = self.root_node.split("|")
@@ -217,7 +214,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
                 parents = [node]
 
         parents = ["root"] + list(parents)
-        print("parents:", parents)
+
         for node in parents:
             full_node_path = None
             if self.root_node and node != "root":
@@ -254,9 +251,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
                     "}"
             )
 
-            print(node, "full_node_path for button", full_node_path)
-            from functools import partial
-
-            button1.clicked.connect(partial(self.draw_node_dependencies_for_current_root,full_node_path))
+            button1.clicked.connect(
+                partial(self.draw_node_dependencies_for_current_root, full_node_path)
+            )
             self.navigation_buttons.append(button1)
             self.nav_bar_layout.addWidget(button1)
