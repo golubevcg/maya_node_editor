@@ -44,15 +44,33 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.scene = Scene(self)
         self.view = QDMGraphicsView(self.scene.gr_scene, self)
-
+        self.view.setStyleSheet("border: 0px")
         self.root_node = None
-        self.navigation_buttons = []
-        self.navigation_bar = QHBoxLayout()
-        self.navigation_bar.setContentsMargins(0, 0, 0, 0)
+        self.navigation_widgets = []
+        self.navigation_bar = QWidget(self)
+        self.navigation_bar.setStyleSheet("background-color:#303030")
+
+        self.inner_nav_bar_wdget = QWidget(self.navigation_bar)
+        self.inner_nav_bar_wdget.setMinimumHeight(40)
+        self.inner_nav_bar_wdget.setContentsMargins(10, 0, 0, 0)
+        self.inner_nav_bar_wdget.setStyleSheet("background-color:#404040; border-radius:15px;")
+
+        vert_layout = QVBoxLayout()
+        self.navigation_bar.setLayout(vert_layout)
+
+        self.nav_bar_layout = QHBoxLayout()
+        self.inner_nav_bar_wdget.setLayout(self.nav_bar_layout)
+        vert_layout.addWidget(self.inner_nav_bar_wdget)
+
+        self.nav_bar_layout.setContentsMargins(0, 0, 0, 0)
+        self.nav_bar_layout.setAlignment(Qt.AlignLeft)
+        self.nav_bar_layout.setSpacing(0)
+        self.nav_bar_layout.setContentsMargins(0, 0, 0, 0)
+        # self.nav_bar_layout.addWidget(QLabel(""))
 
         self.draw_node_dependencies_for_current_root()
 
-        self.layout.addLayout(self.navigation_bar)
+        self.layout.addWidget(self.navigation_bar)
         self.layout.addWidget(self.view)
 
         # create graphic view
@@ -180,12 +198,12 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         return created_nodes
 
     def update_navigation_bar(self):
-        if self.navigation_buttons:
-            for button in self.navigation_buttons:
-                self.navigation_bar.removeWidget(button)
+        if self.navigation_widgets:
+            for button in self.navigation_widgets:
+                self.nav_bar_layout.removeWidget(button)
                 del button
 
-        self.navigation_buttons = []
+        self.navigation_widgets = []
         parents = []
         if self.root_node:
             if self.root_node.count("|") > 1:
@@ -202,9 +220,30 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
                 full_node_path = full_node_path + node
             print("full_node_path", full_node_path)
             button1 = QPushButton(node)
+            button1.setMinimumWidth(60)
+            button1.setMinimumHeight(30)
+            button1.setStyleSheet(
+                "QPushButton"
+                "{"
+                "background-color:#404040; "
+                "border:0px; font-size: 10pt; "
+                "padding-bottom:5; "
+                "padding-right:5; "
+                "padding-left:5; "
+                "border-radius:15px;"
+                "}"
+                "QPushButton:hover"
+                "{"
+                "background-color:#606060; "
+                "}"
+            )
             button1.clicked.connect(
                 lambda: self.draw_node_dependencies_for_current_root(root_node=full_node_path)
             )
-            self.navigation_buttons.append(button1)
-            self.navigation_bar.addWidget(button1)
+            self.navigation_widgets.append(button1)
+            self.nav_bar_layout.addWidget(button1)
+
+            self.navigation_widgets.append(button1)
+            self.nav_bar_layout.addWidget(QLabel("/"))
+
 
