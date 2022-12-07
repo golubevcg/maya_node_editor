@@ -1,3 +1,4 @@
+from collections import deque
 from functools import partial
 
 from PySide2.QtWidgets import *
@@ -5,6 +6,7 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+import maya.OpenMaya as OpenMaya
 from maya import cmds
 
 from node_editor.edge.edge_object import Edge
@@ -24,7 +26,8 @@ default_nodes = [
     u'characterPartition', u'defaultHardwareRenderGlobals', u'ikSystem', u'hyperGraphInfo', u'hyperGraphLayout',
     u'globalCacheControl', u'strokeGlobals', u'dynController1', u'lightLinker1', u'persp', u'perspShape',
     u'top', u'topShape', u'front', u'frontShape', u'side', u'sideShape', u'shapeEditorManager',
-    u'poseInterpolatorManager', u'layerManager', u'defaultLayer', u'renderLayerManager', u'defaultRenderLayer'
+    u'poseInterpolatorManager', u'layerManager', u'defaultLayer', u'renderLayerManager', u'defaultRenderLayer',
+    'MayaNodeEditorSavedTabsInfo',
 ]
 
 
@@ -77,6 +80,9 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
+
+        self.proceeded_node_uuids = []
+
         if root_node:
             top_nodes = cmds.listRelatives(root_node, children=True, fullPath=True)
         else:
@@ -97,6 +103,13 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         max_x = 0
 
         for index, node in enumerate(top_nodes):
+
+            node_uuid = cmds.ls(node, uuid=True)
+            if node_uuid in self.proceeded_node_uuids:
+                continue
+
+            self.proceeded_node_uuids.append(node_uuid)
+
             index += 1
             x_pos = (init_x + index * 300) + x_offset
             y_pos = init_y + index * 100
@@ -107,12 +120,12 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             node_obj = Node(self.scene, node_name, node_type)
             node_obj.path = node
 
-            output_connections = cmds.listConnections(node, source=True, destination=False)
-            input_connections = cmds.listConnections(node, source=False, destination=True)
-
             all_connections = []
+            output_connections = cmds.listConnections(node, source=True, destination=False)
             if output_connections:
                 all_connections.extend(output_connections)
+
+            input_connections = cmds.listConnections(node, source=False, destination=True)
             if input_connections:
                 all_connections.extend(input_connections)
 
@@ -123,13 +136,12 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             )
 
             created_nodes = []
-
             if output_connections:
-                output_nodes = self.add_connected_nodes(output_connections, node_obj)
+                output_nodes = self.create_node_connections(node_obj, output_connections)
                 created_nodes.extend(output_nodes)
 
             if input_connections:
-                input_nodes = self.add_connected_nodes(input_connections, node_obj, output=True)
+                input_nodes = self.create_node_connections(node_obj, input_connections, output=True)
                 created_nodes.extend(input_nodes)
 
             nodes_x_pos = [node.gr_node.pos().x() for node in created_nodes]
@@ -143,55 +155,6 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.scene.gr_scene.update()
         self.view.update()
-
-    def add_connected_nodes(self, nodes_list, node_obj, output=False):
-        pos = node_obj.gr_node.pos()
-
-        x_pos = pos.x()
-        y_pos = pos.y() + 100
-
-        x_offset = 0
-
-        if len(nodes_list) > 1:
-            x_offset = len(nodes_list)/2 * self.connection_x_step
-
-        created_nodes = []
-
-        for index, node_name in enumerate(nodes_list):
-            if node_name in default_nodes:
-                continue
-
-            node_type = cmds.nodeType(node_name)
-
-            upd_y_pos = y_pos + (index+1) * 130
-            if not output:
-                upd_y_pos *= -1
-
-            upd_x_pos = x_pos + index * self.connection_x_step - x_offset
-
-            created_node_obj = Node(self.scene, node_name, node_type)
-            created_node_obj.path = node_name
-            created_node_obj.set_position(upd_x_pos, upd_y_pos)
-            created_nodes.append(created_node_obj)
-
-            if output:
-                Edge(
-                    self.scene,
-                    node_obj,
-                    "input_1",
-                    created_node_obj,
-                    "output_1"
-                )
-            else:
-                Edge(
-                    self.scene,
-                    created_node_obj,
-                    "input_1",
-                    node_obj,
-                    "output_1"
-                )
-
-        return created_nodes
 
     def update_navigation_bar(self):
         if self.navigation_buttons:
@@ -256,3 +219,91 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             )
             self.navigation_buttons.append(button1)
             self.nav_bar_layout.addWidget(button1)
+
+    def create_node_connections(self, node_obj, connections, y_layer_index=2, output=False):
+        print("create_node_connections")
+        node_name = node_obj.path
+
+        nodes = []
+        for index, child in enumerate(connections):
+            if child in default_nodes:
+                continue
+
+            child_obj = NodeConnectionContainer(child, node_obj, len(connections), index, y_layer_index, is_output=output)
+            nodes.append(child_obj)
+
+        created_nodes = []
+
+        nodes.reverse()
+        for container in nodes:
+
+            node_uuid = cmds.ls(container.name, uuid=True)
+            if node_uuid in self.proceeded_node_uuids:
+                continue
+
+            if container.name in default_nodes:
+                continue
+
+            self.proceeded_node_uuids.append(node_uuid)
+
+            node_type = cmds.nodeType(container.name)
+
+            created_node_obj = Node(self.scene, container.name, node_type)
+            created_node_obj.path = container.name
+            created_node_obj.set_position(container.get_x_pos(), container.get_y_pos())
+            created_nodes.append(created_node_obj)
+
+            if output:
+                Edge(
+                    self.scene,
+                    node_obj,
+                    "input_1",
+                    created_node_obj,
+                    "output_1"
+                )
+            else:
+                Edge(
+                    self.scene,
+                    created_node_obj,
+                    "input_1",
+                    node_obj,
+                    "output_1"
+                )
+
+            if output:
+                output_connections = cmds.listConnections(container.name, source=True, destination=False)
+                if output_connections:
+                    grandparent_nodes = self.create_node_connections(created_node_obj, output_connections, y_layer_index=y_layer_index+1)
+                    created_nodes.extend(grandparent_nodes)
+            else:
+                input_connections = cmds.listConnections(container.name, source=False, destination=True)
+                if input_connections:
+                    grandparent_nodes2 = self.create_node_connections(created_node_obj, input_connections, y_layer_index=y_layer_index+1, output=True)
+                    created_nodes.extend(grandparent_nodes2)
+
+        return created_nodes
+
+class NodeConnectionContainer:
+    def __init__(self, node_name, parent_node, amount_of_child_in_layer, x_layer_index, y_layer_index, is_output=False):
+        self.name = node_name
+        self.parent = parent_node
+        self.amount_of_child_in_layer = amount_of_child_in_layer
+        self.y_layer_index = y_layer_index
+        self.x_layer_index = x_layer_index
+
+        self.is_output = is_output
+
+        self.y_layer_offset = 100
+        self.connection_x_step = 150
+
+    def get_x_pos(self):
+        parent_x = self.parent.gr_node.x()
+        return parent_x - ((self.connection_x_step * self.amount_of_child_in_layer) / 2) + self.x_layer_index*self.connection_x_step
+
+    def get_y_pos(self):
+        y_offset = (self.y_layer_index*self.y_layer_offset) + (80*self.x_layer_index)
+        if not self.is_output:
+            y_offset *= -1
+
+        y_pos = self.parent.gr_node.y() + y_offset
+        return y_pos

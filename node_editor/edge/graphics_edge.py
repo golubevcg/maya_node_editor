@@ -71,7 +71,7 @@ class QDMGraphicsEdge(QGraphicsPathItem):
         )
 
         if triangle_source is not None:
-            painter.setPen(self._pen)
+            painter.setPen(self._pen if not self.isSelected() else self._pen_selected)
             painter.setBrush(self._color)
 
             painter.drawPolygon(triangle_source)
