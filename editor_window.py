@@ -46,7 +46,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.view = QDMGraphicsView(self.scene.gr_scene, self)
         self.view.setStyleSheet("border: 0px")
         self.root_node = None
-        self.navigation_widgets = []
+        self.navigation_buttons = []
         self.navigation_bar = QWidget(self)
         self.navigation_bar.setStyleSheet("background-color:#303030")
 
@@ -197,12 +197,15 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         return created_nodes
 
     def update_navigation_bar(self):
-        if self.navigation_widgets:
-            for button in self.navigation_widgets:
+        if self.navigation_buttons:
+            for button in self.navigation_buttons:
+                button.setParent(None)
                 self.nav_bar_layout.removeWidget(button)
                 del button
 
-        self.navigation_widgets = []
+        self.navigation_bar.update()
+        self.inner_nav_bar_wdget.repaint()
+        self.navigation_buttons = []
         parents = []
         print("in update_navigation_bar self.root_node:", self.root_node)
         if self.root_node:
@@ -252,13 +255,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             )
 
             print(node, "full_node_path for button", full_node_path)
+            from functools import partial
 
-            button1.clicked.connect(
-                lambda: self.draw_node_dependencies_for_current_root(root_node=full_node_path)
-            )
-            self.navigation_widgets.append(button1)
+            button1.clicked.connect(partial(self.draw_node_dependencies_for_current_root,full_node_path))
+            self.navigation_buttons.append(button1)
             self.nav_bar_layout.addWidget(button1)
-
-            self.navigation_widgets.append(button1)
-
-
