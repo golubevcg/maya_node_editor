@@ -282,6 +282,7 @@ class QDMGraphicsView(QGraphicsView):
                 parent = parent_list[0]
             else:
                 parent = None
+
             self.updat_node_view_with_new_root(dag_node=parent)
             self.current_root = parent
 

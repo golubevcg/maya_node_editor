@@ -52,8 +52,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.inner_nav_bar_wdget = QWidget(self.navigation_bar)
         self.inner_nav_bar_wdget.setMinimumHeight(40)
-        self.inner_nav_bar_wdget.setContentsMargins(10, 0, 0, 0)
-        self.inner_nav_bar_wdget.setStyleSheet("background-color:#404040; border-radius:15px;")
+        self.inner_nav_bar_wdget.setContentsMargins(0, 0, 0, 0)
+        self.inner_nav_bar_wdget.setStyleSheet("background-color:#404040; border-radius:15px;padding:0px;")
 
         vert_layout = QVBoxLayout()
         self.navigation_bar.setLayout(vert_layout)
@@ -66,7 +66,6 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.nav_bar_layout.setAlignment(Qt.AlignLeft)
         self.nav_bar_layout.setSpacing(0)
         self.nav_bar_layout.setContentsMargins(0, 0, 0, 0)
-        # self.nav_bar_layout.addWidget(QLabel(""))
 
         self.draw_node_dependencies_for_current_root()
 
@@ -205,38 +204,55 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         self.navigation_widgets = []
         parents = []
+        print("in update_navigation_bar self.root_node:", self.root_node)
         if self.root_node:
             if self.root_node.count("|") > 1:
                 parents = self.root_node.split("|")
                 parents = [node for node in parents if node]
             elif "|" in self.root_node:
-                parents = [self.root_node]
+                node = self.root_node.replace("|", "")
+                parents = [node]
 
         parents = ["root"] + list(parents)
+        print("parents:", parents)
         for node in parents:
             full_node_path = None
             if self.root_node and node != "root":
                 full_node_path = self.root_node.split(node)[0]
                 full_node_path = full_node_path + node
-            print("full_node_path", full_node_path)
+
             button1 = QPushButton(node)
             button1.setMinimumWidth(60)
-            button1.setMinimumHeight(30)
+            button1.setMinimumHeight(40)
+
+            left_border_radius = 0
+            if node == "root":
+                left_border_radius = 15
+
             button1.setStyleSheet(
                 "QPushButton"
-                "{"
-                "background-color:#404040; "
-                "border:0px; font-size: 10pt; "
-                "padding-bottom:5; "
-                "padding-right:5; "
-                "padding-left:5; "
-                "border-radius:15px;"
-                "}"
+                    "{"
+                        "background-color:#404040; "
+                        "border-style: solid;"
+                        "border-color:#303030;"
+                        "border-width:0px 2px 0px 0px; "
+                        "font-size: 10pt; "
+                        "padding-bottom:6; "
+                        "padding-right:15; "
+                        "padding-left:15; "
+                        "border-top-left-radius: " + str(left_border_radius) + "px;"
+                        "border-top-right-radius: 0px; "
+                        "border-bottom-left-radius: " + str(left_border_radius) + "px;"
+                        "border-bottom-right-radius: 0px; "
+                    "}"
                 "QPushButton:hover"
-                "{"
-                "background-color:#606060; "
-                "}"
+                    "{"
+                        "background-color:#606060; "
+                    "}"
             )
+
+            print(node, "full_node_path for button", full_node_path)
+
             button1.clicked.connect(
                 lambda: self.draw_node_dependencies_for_current_root(root_node=full_node_path)
             )
@@ -244,6 +260,5 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
             self.nav_bar_layout.addWidget(button1)
 
             self.navigation_widgets.append(button1)
-            self.nav_bar_layout.addWidget(QLabel("/"))
 
 
