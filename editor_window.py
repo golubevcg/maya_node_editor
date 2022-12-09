@@ -283,6 +283,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
 
         return created_nodes
 
+
 class NodeConnectionContainer:
     def __init__(self, node_name, parent_node, amount_of_child_in_layer, x_layer_index, y_layer_index, is_output=False):
         self.name = node_name

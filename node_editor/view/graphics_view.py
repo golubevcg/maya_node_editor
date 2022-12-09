@@ -73,6 +73,19 @@ class QDMGraphicsView(QGraphicsView):
         else:
             super(QDMGraphicsView, self).mouseReleaseEvent(event)
 
+    def mouseDoubleClickEvent(self, e):
+        left_button_used = False
+        if e.button() == Qt.LeftButton:
+            left_button_used = True
+
+        if left_button_used:
+            item_clicked = self.get_item_at_click(e)
+            node_full_name = item_clicked.node.path
+            if node_full_name:
+                self.update_node_view_with_new_root(dag_node=node_full_name)
+
+        super(QDMGraphicsView, self).mouseDoubleClickEvent(e)
+
     def middle_mouse_button_press(self, event):
         release_event = QMouseEvent(
             QEvent.MouseButtonRelease,
@@ -287,7 +300,7 @@ class QDMGraphicsView(QGraphicsView):
             else:
                 parent = None
 
-            self.updat_node_view_with_new_root(dag_node=parent)
+            self.update_node_view_with_new_root(dag_node=parent)
             self.current_root = parent
 
         if len(selection) != 1:
@@ -298,10 +311,10 @@ class QDMGraphicsView(QGraphicsView):
             return
 
         node_full_name = selected_item.node.path
-        if key == Qt.Key_I:
-            self.updat_node_view_with_new_root(dag_node=node_full_name)
+        if key == Qt.Key_I and node_full_name:
+            self.update_node_view_with_new_root(dag_node=node_full_name)
 
-    def updat_node_view_with_new_root(self, dag_node=None):
+    def update_node_view_with_new_root(self, dag_node=None):
         self.gr_scene.scene.main_window.draw_node_dependencies_for_current_root(dag_node)
         self.current_root = dag_node
 
