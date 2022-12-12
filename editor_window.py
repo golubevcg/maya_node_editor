@@ -1,4 +1,3 @@
-from collections import deque
 from functools import partial
 
 from PySide2.QtWidgets import *
@@ -6,7 +5,6 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
-import maya.OpenMaya as OpenMaya
 from maya import cmds
 
 from node_editor.edge.edge_object import Edge
@@ -32,6 +30,7 @@ default_nodes = [
 
 
 class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
+    """Main node editor window"""
     def __init__(self, *args, **kwargs):
         super(NodeEditorWindow, self).__init__(*args, **kwargs)
         self.init_ui()
@@ -80,6 +79,7 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.show()
 
     def draw_node_dependencies_for_current_root(self, root_node=None):
+        """Draw all nodes and edges for given maya root node"""
 
         self.proceeded_node_uuids = []
 

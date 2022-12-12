@@ -22,7 +22,7 @@ as new module in maya and launch this code:
 >wnd = NodeEditorWindow()
 
 Small article about this editor:
-http://golubevcg.com/post/attempt_for_a_global_node_editor_for_maya
+http://golubevcg.com/post/attempt_for_a_global_node_editor_in_maya
 
 How it looks launched on simple example:
 
