@@ -156,6 +156,8 @@ class NodeEditorWindow(QWidget, MayaQWidgetDockableMixin):
         self.scene.gr_scene.update()
         self.view.update()
 
+
+
     def update_navigation_bar(self):
         if self.navigation_buttons:
             for button in self.navigation_buttons:
