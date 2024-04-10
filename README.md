@@ -18,7 +18,7 @@ as a new module in Maya and launch this code:
 >wnd = NodeEditorWindow()
 
 Small article about this editor:
-http://golubevcg.com/post/global_node_editor_for_autodesk_maya
+[Developing a Global Node Editor in Maya](https://golubevcg.com/post/developing_a_global_node_editor_in_maya)
 
 How it looks launched on a simple example:
 
